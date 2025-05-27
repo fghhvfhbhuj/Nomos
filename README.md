@@ -28,9 +28,7 @@
 
 当标的资产价格在时间轴上起伏，一幅动态的金融山水画便徐徐展开。最迷人之处在于，这件作品能在千变万化的市场环境中保持自己的结构完整性，正如巴赫的赋格曲在音符变换中维持和声结构。
 
-[走进这幅作品](./Day001-Adaptive-Margin-Control-Note)
 
-![收益的韵律](./Day001-Adaptive-Margin-Control-Note/simulation_charts/payout_distribution.png)
 
 ### 第二号作品：信用触发票据 - 信任的价格理论
 
@@ -38,9 +36,7 @@
 
 最引人入胜之处在于触发机制的设计——它像一个精心设置的戏剧转折点，在平静的票息支付中引入一丝悬念，使整个结构既保持稳定性，又不失趣味性。
 
-[走进这幅作品](./Day002-Credit-Triggered-Note)
 
-![信用的色彩](./Day002-Credit-Triggered-Note/ctn_pricing_visualization.png)
 
 ### 更多画作，徐徐展开...
 
