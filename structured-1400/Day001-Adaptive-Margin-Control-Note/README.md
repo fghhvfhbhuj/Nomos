@@ -20,7 +20,7 @@
 
 ## 🗂️ 项目目录结构
 
-```bash
+
 Adaptive-Margin-Control-Note/
 ├── README.md                   ← 当前文档
 ├── term-sheet.md               ← 正式条款说明书
