@@ -71,6 +71,19 @@ p = a \cdot \mathbb{P}[\text{Tick Jump Knock-Out}]
 
 ---
 
+## 数学建模与模拟方法
+
+定价模型通过以下步骤实现 tick 跳跃触发机制的概率计算：
+
+1. 使用 GBM 模型生成价格路径。
+2. 分析每条路径中是否存在满足触发逻辑的时间段。
+3. 统计触发路径的比例作为赔付概率。
+4. 计算结构价格 `p = a \cdot \mathbb{P}[\text{Tick Jump Knock-Out}]`。
+
+模拟结果验证了逻辑的合理性，并提供了市场条件下的赔付概率估计。
+
+---
+
 ## 4. 示例路径与演示说明
 
 请参考 `scenario.md` 与 `simulation_charts/price_jump_demo.png`  

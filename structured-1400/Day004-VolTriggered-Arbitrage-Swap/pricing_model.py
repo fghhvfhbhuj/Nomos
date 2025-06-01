@@ -3,6 +3,10 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import os
 from datetime import datetime, timedelta
+import json
+from arch import arch_model
+from concurrent.futures import ProcessPoolExecutor
+import logging
 
 # 设置图表输出路径
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -168,6 +172,49 @@ def simulate_rate_path(from_currency, to_currency, days, include_forward=False):
     
     return rate_path
 
+# 引入GARCH模型以生成波动率路径，并修改模拟汇率路径函数以使用动态波动率路径
+def simulate_garch_volatility(initial_volatility, days):
+    # 使用GARCH(1,1)模型生成波动率路径
+    garch = arch_model(np.zeros(days), vol='Garch', p=1, q=1)
+    garch_fit = garch.fit(disp='off')
+    simulated_volatility = garch_fit.simulate(params=garch_fit.params, nobs=days)
+    return simulated_volatility['volatility']
+
+# 修改模拟汇率路径函数以使用GARCH波动率
+
+def simulate_rate_path_with_garch(from_currency, to_currency, days, include_forward=False):
+    spot_rate = get_rate(from_currency, to_currency)
+    initial_volatility = get_volatility(from_currency, to_currency)
+    drift = 0.0  # 假设无漂移
+
+    # 使用GARCH模型生成波动率路径
+    volatility_path = simulate_garch_volatility(initial_volatility, days)
+
+    dt = 1.0 / 252  # 假设252个交易日/年
+    rate_path = [spot_rate]
+
+    for day in range(days):
+        last_rate = rate_path[-1]
+        deviation = (last_rate - spot_rate) / spot_rate
+        intervention = -0.01 * np.tanh(deviation * 10)  # 国家干预阻力
+
+        random_factor = np.random.normal(0, 1)
+        new_rate = last_rate * np.exp((drift + intervention) * dt + volatility_path[day] * np.sqrt(dt) * random_factor)
+        rate_path.append(new_rate)
+
+    if include_forward:
+        forward_rates = []
+        for day in range(days + 1):
+            remaining_days = days - day
+            if remaining_days > 0:
+                forward = calculate_forward_rate(rate_path[day], from_currency, to_currency, remaining_days)
+            else:
+                forward = rate_path[day]
+            forward_rates.append(forward)
+        return rate_path, forward_rates
+
+    return rate_path
+
 # 计算套利路径的综合收益
 def calculate_arbitrage_profit(currency_path, day, rates_dict, include_fees=True):
     profit_factor = 1.0
@@ -286,38 +333,41 @@ class ArbitrageSimulation:
         plt.savefig(save_path)
         plt.close()
 
+def run_simulations_in_parallel(num_simulations, simulation_days, currencies):
+    def run_single_simulation(sim_id):
+        start_currency = np.random.choice(currencies)
+        path_len = np.random.randint(3, min(len(currencies), 6))
+        sim = ArbitrageSimulation(start_currency, path_len, simulation_days)
+        sim.simulate()
+        sim_results = sim.get_results()
+        return {
+            "sim_id": sim_id,
+            "currency_path": "→".join(sim_results["currency_path"]),
+            "path_length": len(sim_results["currency_path"]) - 1,
+            "is_triggered": sim_results["is_triggered"],
+            "trigger_day": sim_results["trigger_day"] if sim_results["is_triggered"] else -1,
+            "exit_day": sim_results["exit_day"],
+            "max_profit": sim_results["max_profit"],
+            "final_profit": sim_results["final_profit"],
+            "holding_period": sim_results["exit_day"] - sim_results["trigger_day"] if sim_results["exit_day"] != -1 and sim_results["is_triggered"] else (simulation_days - sim_results["trigger_day"] if sim_results["is_triggered"] else 0)
+        }
+
+    with ProcessPoolExecutor() as executor:
+        results = list(executor.map(run_single_simulation, range(num_simulations)))
+
+    return results
+
 # 运行多条模拟
 print("开始模拟多角套汇和远期货币交换...")
-results = []
-track_sims = []
+logging.basicConfig(
+    filename=os.path.join(current_dir, "simulation.log"),
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s"
+)
+logging.info("开始模拟多角套汇和远期货币交换...")
+logging.info(f"模拟参数: num_simulations={num_simulations}, simulation_days={simulation_days}, currencies={currencies}")
 
-for i in range(num_simulations):
-    if i % 1000 == 0:
-        print(f"模拟进度: {i}/{num_simulations}")
-    
-    # 随机生成不同起始货币的模拟
-    start_currency = np.random.choice(currencies)
-    path_len = np.random.randint(3, min(len(currencies), 6))  # 随机路径长度
-    
-    sim = ArbitrageSimulation(start_currency, path_len, simulation_days)
-    sim.simulate()
-    sim_results = sim.get_results()
-    
-    results.append({
-        "sim_id": i,
-        "currency_path": "→".join(sim_results["currency_path"]),
-        "path_length": len(sim_results["currency_path"]) - 1,  # 减去重复的起始货币
-        "is_triggered": sim_results["is_triggered"],
-        "trigger_day": sim_results["trigger_day"] if sim_results["is_triggered"] else -1,
-        "exit_day": sim_results["exit_day"],
-        "max_profit": sim_results["max_profit"],
-        "final_profit": sim_results["final_profit"],
-        "holding_period": sim_results["exit_day"] - sim_results["trigger_day"] if sim_results["exit_day"] != -1 and sim_results["is_triggered"] else (simulation_days - sim_results["trigger_day"] if sim_results["is_triggered"] else 0)
-    })
-    
-    # 保存一些示例轨迹用于可视化
-    if i < num_tracks_to_save:
-        track_sims.append(sim)
+results = run_simulations_in_parallel(num_simulations, simulation_days, currencies)
 
 # 创建数据框并保存CSV
 df = pd.DataFrame(results)
@@ -367,6 +417,14 @@ plt.close()
 for i, sim in enumerate(track_sims):
     if i < num_tracks_to_save:
         sim.plot_profit_path(os.path.join(tracks_dir, f"track_{i}.png"))
+
+logging.info("模拟完成！")
+logging.info(f"总共模拟了 {num_simulations} 条路径")
+logging.info(f"触发率: {trigger_rate:.2%}")
+logging.info(f"平均持有期: {avg_holding_period:.2f} 天")
+logging.info(f"平均最大收益: {avg_max_profit:.4f}")
+logging.info(f"CSV保存到: {csv_path}")
+logging.info(f"图表保存到: {simulation_charts_dir}")
 
 print(f"模拟完成！")
 print(f"总共模拟了 {num_simulations} 条路径")

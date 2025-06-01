@@ -64,7 +64,7 @@ class GammaAmplifierNote:
         # 激活区间
         self.activation_low = K - delta
         self.activation_high = K + delta
-    
+
     def simulate_price_path(self, num_paths=1, random_seed=None):
         """
         模拟标的资产价格路径
@@ -341,12 +341,15 @@ class GammaAmplifierNote:
         valid_multiples = valid_multiples[~np.isnan(valid_multiples)]
         valid_multiples = valid_multiples[np.abs(valid_multiples) < 10]  # 过滤极端值
         
-        sns.histplot(valid_multiples, bins=30, kde=True)
-        plt.axvline(x=1, color='r', linestyle='--', alpha=0.7)
-        plt.title('GAN收益放大倍数分布', fontsize=15)
-        plt.xlabel('收益放大倍数', fontsize=12)
-        plt.ylabel('频率', fontsize=12)
-        plt.savefig('simulation_charts/收益放大倍数分布.png', dpi=300, bbox_inches='tight')
+        if len(valid_multiples) > 0:  # 确保有有效数据
+            sns.histplot(valid_multiples, bins=30, kde=True)
+            plt.axvline(x=1, color='r', linestyle='--', alpha=0.7)
+            plt.title('GAN收益放大倍数分布', fontsize=15)
+            plt.xlabel('收益放大倍数', fontsize=12)
+            plt.ylabel('频率', fontsize=12)
+            plt.savefig('simulation_charts/收益放大倍数分布.png', dpi=300, bbox_inches='tight')
+        else:
+            print("警告: 没有有效的收益放大倍数数据可以绘制")
         plt.close()
         
         # 5. 实现波动率与GAN收益关系图
@@ -356,11 +359,17 @@ class GammaAmplifierNote:
         plt.xlabel('实现波动率', fontsize=12)
         plt.ylabel('GAN收益率', fontsize=12)
         plt.gca().yaxis.set_major_formatter(PercentFormatter(1.0))
-        # 添加趋势线
-        z = np.polyfit(results_df['实现波动率'], results_df['GAN收益率'], 2)
-        p = np.poly1d(z)
-        x_range = np.linspace(min(results_df['实现波动率']), max(results_df['实现波动率']), 100)
-        plt.plot(x_range, p(x_range), "r--", alpha=0.8)
+        
+        # 添加趋势线 - 确保有足够的数据点
+        if len(results_df) > 2:
+            try:
+                z = np.polyfit(results_df['实现波动率'], results_df['GAN收益率'], 2)
+                p = np.poly1d(z)
+                x_range = np.linspace(min(results_df['实现波动率']), max(results_df['实现波动率']), 100)
+                plt.plot(x_range, p(x_range), "r--", alpha=0.8)
+            except np.linalg.LinAlgError:
+                print("警告: 无法拟合趋势线，可能是因为数据点太少或共线性问题")
+        
         plt.savefig('simulation_charts/波动率与收益关系.png', dpi=300, bbox_inches='tight')
         plt.close()
         
@@ -378,8 +387,8 @@ class GammaAmplifierNote:
                 sigma=self.sigma
             )
             
-            # 模拟100条路径计算平均收益
-            paths = temp_gan.simulate_price_path(100)
+            # 模拟较少条路径以加快速度
+            paths = temp_gan.simulate_price_path(50)
             payoffs = [temp_gan.calculate_gan_payoff(path) for path in paths]
             avg_payoffs.append(np.mean(payoffs))
         
@@ -395,37 +404,53 @@ class GammaAmplifierNote:
         
         # 7. 典型价格路径及其收益示例
         # 选择最高收益和中等收益的路径进行展示
-        top_path_idx = results_df['GAN收益率'].argmax()
-        mid_path_idx = results_df['GAN收益率'].rank(pct=True).sub(0.5).abs().argmin()
-        
-        selected_paths = [top_path_idx, mid_path_idx]
-        path_labels = ['最高收益路径', '中等收益路径']
-        path_colors = ['green', 'blue']
-        
-        price_paths = self.simulate_price_path(num_paths=len(results_df), random_seed=42)
-        
-        plt.figure(figsize=(14, 10))
-        
-        for i, path_idx in enumerate(selected_paths):
-            path = price_paths[path_idx]
-            time_points = np.linspace(0, self.T * 365, len(path))
+        if len(results_df) > 0:
+            top_path_idx = results_df['GAN收益率'].idxmax()
             
-            plt.plot(time_points, path, label=f"{path_labels[i]} (收益率: {results_df.iloc[path_idx]['GAN收益率']:.2%})", 
-                     color=path_colors[i], alpha=0.8)
+            # 安全地选择中等收益路径
+            try:
+                mid_path_idx = results_df['GAN收益率'].rank(pct=True).sub(0.5).abs().idxmin()
+            except:
+                # 如果中位数选择失败，选择第一个路径作为备选
+                mid_path_idx = results_df.index[0] if len(results_df) > 0 else top_path_idx
             
-            # 标记激活区间
-            plt.axhline(y=self.activation_low, color='red', linestyle='--', alpha=0.5)
-            plt.axhline(y=self.activation_high, color='red', linestyle='--', alpha=0.5)
-            plt.fill_between(time_points, self.activation_low, self.activation_high, 
-                             color='red', alpha=0.1, label='激活区间')
-        
-        plt.title('典型价格路径示例', fontsize=15)
-        plt.xlabel('时间 (天)', fontsize=12)
-        plt.ylabel('价格', fontsize=12)
-        plt.legend()
-        plt.grid(True, alpha=0.3)
-        plt.savefig('simulation_charts/典型价格路径.png', dpi=300, bbox_inches='tight')
-        plt.close()
+            selected_paths = [top_path_idx, mid_path_idx]
+            path_labels = ['最高收益路径', '中等收益路径']
+            path_colors = ['green', 'blue']
+            
+            # 重新生成相同的路径，确保一致性
+            try:
+                price_paths = self.simulate_price_path(num_paths=max(selected_paths) + 1, random_seed=42)
+                
+                plt.figure(figsize=(14, 10))
+                
+                for i, path_idx in enumerate(selected_paths):
+                    if path_idx < len(price_paths):
+                        path = price_paths[path_idx]
+                        time_points = np.linspace(0, self.T * 365, len(path))
+                        
+                        plt.plot(time_points, path, 
+                                label=f"{path_labels[i]} (收益率: {results_df.loc[path_idx, 'GAN收益率']:.2%})", 
+                                color=path_colors[i], alpha=0.8)
+                
+                # 标记激活区间
+                plt.axhline(y=self.activation_low, color='red', linestyle='--', alpha=0.5)
+                plt.axhline(y=self.activation_high, color='red', linestyle='--', alpha=0.5)
+                plt.fill_between(time_points, self.activation_low, self.activation_high, 
+                                color='red', alpha=0.1, label='激活区间')
+                
+                plt.title('典型价格路径示例', fontsize=15)
+                plt.xlabel('时间 (天)', fontsize=12)
+                plt.ylabel('价格', fontsize=12)
+                plt.legend()
+                plt.grid(True, alpha=0.3)
+                plt.savefig('simulation_charts/典型价格路径.png', dpi=300, bbox_inches='tight')
+            except Exception as e:
+                print(f"绘制典型价格路径时出错: {str(e)}")
+            
+            plt.close()
+        else:
+            print("警告: 没有足够的路径数据来绘制典型价格路径")
 
 
 def main():
@@ -456,29 +481,44 @@ def main():
     )
     
     # 计算GAN价格
-    gan_price = gan_model.price_gan(num_simulations=1000)
-    print(f"GAN定价结果: {gan_price:.4f}")
+    try:
+        gan_price = gan_model.price_gan(num_simulations=500)  # 减少模拟次数以加快运行
+        print(f"GAN定价结果: {gan_price:.4f}")
+    except Exception as e:
+        print(f"GAN定价计算出错: {str(e)}")
     
     # 运行回测模拟
     print("开始回测模拟...")
-    results = gan_model.run_backtest(num_paths=1000, output_file="pricing_result.csv")
-    
-    # 输出摘要统计信息
-    print("\n===== GAN回测统计摘要 =====")
-    print(f"平均GAN收益率: {results['GAN收益率'].mean():.2%}")
-    print(f"GAN收益率标准差: {results['GAN收益率'].std():.2%}")
-    print(f"最大GAN收益率: {results['GAN收益率'].max():.2%}")
-    print(f"最小GAN收益率: {results['GAN收益率'].min():.2%}")
-    print(f"激活路径比例: {results['是否曾激活'].mean():.2%}")
-    
-    print(f"\n平均普通策略收益率: {results['普通策略收益率'].mean():.2%}")
-    print(f"普通策略收益率标准差: {results['普通策略收益率'].std():.2%}")
-    
-    print(f"\n平均收益放大倍数: {results['收益放大倍数'].mean():.2f}")
-    
-    print("\n模拟回测完成！结果已保存到pricing_result.csv")
-    print("分析图表已保存到simulation_charts文件夹")
+    try:
+        results = gan_model.run_backtest(num_paths=500, output_file="pricing_result.csv")  # 减少路径数量以加快运行
+        
+        # 输出摘要统计信息
+        print("\n===== GAN回测统计摘要 =====")
+        print(f"平均GAN收益率: {results['GAN收益率'].mean():.2%}")
+        print(f"GAN收益率标准差: {results['GAN收益率'].std():.2%}")
+        print(f"最大GAN收益率: {results['GAN收益率'].max():.2%}")
+        print(f"最小GAN收益率: {results['GAN收益率'].min():.2%}")
+        print(f"激活路径比例: {results['是否曾激活'].mean():.2%}")
+        
+        print(f"\n平均普通策略收益率: {results['普通策略收益率'].mean():.2%}")
+        print(f"普通策略收益率标准差: {results['普通策略收益率'].std():.2%}")
+        
+        # 安全计算平均收益放大倍数
+        valid_multiples = results['收益放大倍数'].dropna()
+        valid_multiples = valid_multiples[np.abs(valid_multiples) < 10]  # 过滤极端值
+        if len(valid_multiples) > 0:
+            print(f"\n平均收益放大倍数: {valid_multiples.mean():.2f}")
+        else:
+            print("\n没有有效的收益放大倍数数据")
+        
+        print("\n模拟回测完成！结果已保存到pricing_result.csv")
+        print("分析图表已保存到simulation_charts文件夹")
+    except Exception as e:
+        print(f"回测模拟过程中出错: {str(e)}")
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as e:
+        print(f"程序执行过程中出现错误: {str(e)}")
 
