@@ -1,68 +1,70 @@
-# 衍生品结构 Day004：波动率触发型多货币套利与货币互换延展结构
+# Day004: Volatility-Triggered Multi-Currency Arbitrage and Swap Extension Structure
 
-本结构为 Structure1400 系列第004号产品，是一个具备条件触发机制的结构化衍生品，其核心基于"波动率触发（Volatility Triggered）"进行套利机会监测，并结合多币种路径套利与货币互换技术，实现套利机会的时间延展。
-
----
-
-## 🔧 结构概览
-
-* **触发指标**：套利收益率波动率
-* **敲入机制**：当套利收益率超过阈值 `d = 0.002` 时自动敲入
-* **执行结构**：选定 n 个币种进行闭环套利（例如美元 → 日元 → 人民币 → 英镑 → 美元）
-* **货币互换机制**：通过货币互换实现套利持仓的时间延展与风险管理
-* **敲出机制**：当套利收益压缩至低于阈值 `z = 0.0005` 时自动敲出
-* **定价模拟**：基于几何布朗运动（GBM）与"国家干预阻力项"的蒙特卡洛路径模拟
+This structured product is the fourth in the Structured-1400 series. It is a conditional-triggered structured derivative that monitors arbitrage opportunities based on "Volatility Triggered" mechanisms. By combining multi-currency path arbitrage and currency swap techniques, it extends the timing of arbitrage opportunities.
 
 ---
 
-## 💰 定价逻辑
+## 🔧 Structural Overview
 
-套利空间通过以下乘法路径模型表示：
-
-$A(t) = \left(\prod S_{i \to i+1}(t) \right) \times (1 - \delta)^n - 1$
-
-其中：
-
-* $S_{i \to i+1}(t)$：第 i 对货币的即期汇率
-* $\delta$：每一跳的交易费用率，默认为 0.001
-* $n$：套利路径的货币数，默认为 4
-
-当 $A(t) > d$ 时，触发套利；当 $A(t) < z$ 时，视为套利机会压缩，触发敲出。
+* **Trigger Indicator**: Arbitrage yield volatility.
+* **Knock-In Mechanism**: Automatically knocks in when arbitrage yield exceeds the threshold `d = 0.002`.
+* **Execution Structure**: Select `n` currencies for closed-loop arbitrage (e.g., USD → JPY → CNY → GBP → USD).
+* **Currency Swap Mechanism**: Extends arbitrage positions' timing and manages risks through currency swaps.
+* **Knock-Out Mechanism**: Automatically knocks out when arbitrage yield compresses below the threshold `z = 0.0005`.
+* **Pricing Simulation**: Monte Carlo path simulation based on Geometric Brownian Motion (GBM) with "national intervention resistance terms."
 
 ---
 
-## 🔁 执行条件说明
+## 💰 Pricing Logic
 
-本结构假设最终执行者具备以下能力：
+The arbitrage space is represented by the following multiplicative path model:
 
-* 已签署 ISDA 主协议（具备货币互换资格）
-* 实时接入 FX 执行平台（如 Bloomberg FXGO, Refinitiv, EBS, Citadel 等）
-* 拥有自动化汇率交易与互换执行基础设施
+$$
+A(t) = \left(\prod S_{i \to i+1}(t) \right) \times (1 - \delta)^n - 1
+$$
 
-在套利条件满足后，产品将通过事先设定的路径迅速执行货币兑换及互换操作，实现套利与延时交割。
+Where:
 
----
+* $S_{i \to i+1}(t)$: Spot exchange rate for currency pair `i`.
+* $\delta$: Transaction fee rate per jump, default is 0.001.
+* $n$: Number of currencies in the arbitrage path, default is 4.
 
-## 🧠 优化空间设计
-
-本结构支持智能优化扩展：
-
-1. **多因子触发学习机制**：可引入波动率、利差、流动性等多个指标，通过加权学习确定综合触发权重
-2. **参数生命周期管理**：历史训练结果设定有限有效期，避免旧市场状态影响现有模型
-3. **市场滚动重训练**：定期基于滚动窗口更新参数，增强模型鲁棒性
-4. **套利路径智能选择**：未来版本可引入GARCH波动率模型与RL算法动态优化套利货币路径
+When $A(t) > d$, arbitrage is triggered; when $A(t) < z$, arbitrage opportunities are considered compressed, triggering knock-out.
 
 ---
 
-## 📁 项目文件结构
+## 🔁 Execution Conditions
 
-* `whitepaper.md`：结构逻辑、动机与理论假设说明
-* `risk-disclosure.md`：风险条款、市场极端情境说明
-* `pricing_model.py`：定价模拟主程序（自动生成 CSV 和图表）
-* `simulation_charts/`：路径图像输出目录
-* `trigger-engine.md`：敲入敲出机制原理说明
-* `pricingresult.csv`：模拟输出收益数据（自动生成）
+This structure assumes the final executor possesses the following capabilities:
+
+* Signed ISDA Master Agreement (qualified for currency swaps).
+* Real-time access to FX execution platforms (e.g., Bloomberg FXGO, Refinitiv, EBS, Citadel).
+* Automated infrastructure for exchange rate trading and swap execution.
+
+Upon meeting arbitrage conditions, the product swiftly executes currency exchanges and swaps through pre-set paths, achieving arbitrage and delayed settlement.
 
 ---
 
-© 2025 Structure1400 系列
+## 🧠 Optimization Space Design
+
+This structure supports intelligent optimization extensions:
+
+1. **Multi-Factor Trigger Learning Mechanism**: Introduce multiple indicators such as volatility, interest rate spreads, and liquidity, using weighted learning to determine comprehensive trigger weights.
+2. **Parameter Lifecycle Management**: Set finite validity periods for historical training results to avoid outdated market states affecting current models.
+3. **Market Rolling Retraining**: Periodically update parameters based on rolling windows to enhance model robustness.
+4. **Intelligent Arbitrage Path Selection**: Future versions may incorporate GARCH volatility models and RL algorithms to dynamically optimize arbitrage currency paths.
+
+---
+
+## 📁 Project File Structure
+
+* `whitepaper.md`: Explanation of structural logic, motivations, and theoretical assumptions.
+* `risk-disclosure.md`: Risk terms and extreme market scenario descriptions.
+* `pricing_model.py`: Main pricing simulation program (automatically generates CSV and charts).
+* `simulation_charts/`: Path image output directory.
+* `trigger-engine.md`: Explanation of knock-in and knock-out mechanism principles.
+* `pricingresult.csv`: Simulated output yield data (automatically generated).
+
+---
+
+© 2025 Structured-1400 Series

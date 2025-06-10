@@ -1,126 +1,126 @@
 # Whitepaper — Credit-Triggered Redemption Note
 
-## 📘 项目定位
+## 📘 Project Positioning
 
-本产品为 Structured-1400 系列第 002 号结构票据（Day002），旨在构造一种**信用事件驱动的熔断型赔付结构票据**，结合风险管理逻辑、路径合约语言与教学可视化模型，模拟衍生品从结构构思到模型定价的完整流程。
+This product represents Structure No. 002 (Day002) in the Structured-1400 series, designed as a **credit event-driven contingent redemption structured note**. It combines risk management logic, path contract language, and educational visualization models to simulate the complete process from structural conceptualization to model pricing of derivatives.
 
-**模型技术升级**：最新版本采用模块化架构，支持敏感性分析、专业级可视化和自动化报告生成，显著提升了模型的实用性和教学价值。
-
----
-
-## 🎯 核心结构设计思想
-
-* 利用"观察期 + 风控触发 + 赔付封顶"机制，实现对**高风险标的的结构性再封装**
-* 将"保险型赔付"嵌入结构路径中，使结构票据**自动响应信用恶化事件**
-* 结合**大数定理**控制赔付期望，通过结构平均回报实现正向盈利
-* **新增**：多层次风险管理和实时敏感性监控
+**Model Technical Upgrade**: The latest version adopts a modular architecture, supporting sensitivity analysis, professional-grade visualization, and automated report generation, significantly enhancing the model's practicality and educational value.
 
 ---
 
-## 🧱 结构路径逻辑
+## 🎯 Core Structural Design Philosophy
 
-### 1. 投资路径结构
+* Utilizing "observation period + risk control trigger + capped payout" mechanisms to achieve **structured repackaging of high-risk underlyings**
+* Embedding "insurance-type payouts" into the structure path, enabling the structured note to **automatically respond to credit deterioration events**
+* Leveraging the **law of large numbers** to control expected payouts, achieving positive returns through structural average returns
+* **New addition**: Multi-level risk management and real-time sensitivity monitoring
 
-* 用户投入本金后，结构首先进入观察期（默认15天）
-* 观察期内资金冻结，最终释放贴现补偿金（类似无息债券贴现）
-* 若观察期未触发敲出，则转入主结构路径，周期性获得票息现金流
-* 若中途触发敲出机制，则结构终止并赔付"未来贴现现金流 + 保费"
+---
 
-**实际计算示例**（基于当前模型）：
-- 观察期补偿金：¥205.69
-- 正常路径总价值：¥104,816.22
-- 敲出时赔付价值：¥109,816.22
+## 🧱 Structural Path Logic
 
-### 2. 敲出机制设计
+### 1. Investment Path Structure
 
-* 使用可替换的信用评分函数 `risk_score_func()` 判断敲出条件
-* 默认评分规则如下：
+* After initial principal investment, the structure enters an observation period (default 15 days)
+* Funds are frozen during the observation period, ultimately releasing discount compensation (similar to zero-coupon bond discounting)
+* If no knock-out is triggered during the observation period, the structure transitions to the main path, generating periodic coupon cash flows
+* If knock-out is triggered, the structure terminates and pays "future discounted cash flows + premium"
+
+**Calculation Example** (based on current model):
+- Observation period compensation: ¥205.69
+- Normal path total value: ¥104,816.22
+- Knock-out redemption value: ¥109,816.22
+
+### 2. Knock-Out Mechanism Design
+
+* Utilizes a replaceable credit scoring function `risk_score_func()` to determine knock-out conditions
+* Default scoring rules as follows:
 
   $$
-  \text{Score} = w_1 \cdot \text{利息覆盖倍数} + w_2 \cdot \text{流动比率} + w_3 \cdot \text{信用评级分} + w_4 \cdot \text{市值/面值比}
+  \text{Score} = w_1 \cdot \text{Interest Coverage Ratio} + w_2 \cdot \text{Current Ratio} + w_3 \cdot \text{Credit Rating Score} + w_4 \cdot \text{Market Value/Par Value Ratio}
   $$
-* 连续 3 日低于评分阈值（默认 50 分）则判定敲出
-* **增强功能**：支持机器学习模型和异常检测算法
+* Three consecutive days below the score threshold (default 50 points) triggers knock-out
+* **Enhanced functionality**: Support for machine learning models and anomaly detection algorithms
 
-### 3. 赔付结构封顶逻辑
+### 3. Payout Cap Logic
 
-* 敲出赔付金额 = 所有剩余现金流贴现 + 保费 π
-* 可设封顶比例（默认不超过票据价格的 110%），以控制最大亏损
-* **风险控制**：多重安全机制确保赔付合理性
-
----
-
-## 💰 盈利结构与定价逻辑
-
-结构价格由以下两部分构成：
-
-$$
-P = V_{\text{正常贴现}} + \pi
-$$
-
-其中：
-
-* $V_{\text{正常贴现}}$：正常收益路径下的贴现现金流总值（¥104,816.22）
-* $\pi$：信用风险溢价（即"保费"，默认¥5,000），用于覆盖赔付期望
-
-发行人盈利模型满足：
-
-$$
-\pi > \mathbb{E}[\text{赔付成本}] \quad \Rightarrow \quad \text{结构系统盈利 > 0}
-$$
-
-**敏感性分析**：模型自动测试不同参数组合下的盈利稳定性。
+* Knock-out payout amount = All remaining discounted cash flows + premium π
+* Configurable cap ratio (default not exceeding 110% of note price) to control maximum loss
+* **Risk control**: Multiple safety mechanisms ensure payout reasonability
 
 ---
 
-## 🔄 可替换性模块设计
+## 💰 Profit Structure and Pricing Logic
 
-为适应教学、仿真与实际模型部署，本结构支持以下模块替换：
+The structure price consists of the following two components:
 
-| 模块 | 文件 | 说明 | 新增功能 |
-|------|------|------|----------|
-| 信用评分函数 | `risk_score_func_demo.py` | 可替换为任意风控评分逻辑 | 支持ML模型和异常检测 |
-| 敲出判断策略 | `pricing_model.py` 中条件判断 | 可改为 AI 模型输出风险等级 | 参数动态配置 |
-| 赔付路径 | `pricing_model.py` 中敲出路径分支 | 可设置为多级赔付（轻度/重度） | 封顶机制优化 |
-| 参数设定 | `pricing_model.py` 常量区 | 保费 π、贴现率 r 等均可修改 | 模块化参数管理 |
-| 报告生成 | 新增 HTML 报告功能 | 自动生成专业分析报告 | 完全新增 |
+$$
+P = V_{\text{Normal Discounting}} + \pi
+$$
+
+Where:
+
+* $V_{\text{Normal Discounting}}$: Total discounted cash flow value under normal return path (¥104,816.22)
+* $\pi$: Credit risk premium (i.e., "premium", default ¥5,000), used to cover expected payouts
+
+The issuer's profit model satisfies:
+
+$$
+\pi > \mathbb{E}[\text{Payout Cost}] \quad \Rightarrow \quad \text{Structural System Profit > 0}
+$$
+
+**Sensitivity Analysis**: The model automatically tests profit stability under different parameter combinations.
 
 ---
 
-## 📈 模型可视化与路径模拟
+## 🔄 Interchangeable Module Design
 
-* 结构定价模型提供敲出概率 $p$ 与结构期望价值函数图像：
+To accommodate teaching, simulation, and actual model deployment, this structure supports the following module replacements:
+
+| Module | File | Description | New Features |
+|--------|------|-------------|--------------|
+| Credit Scoring Function | `risk_score_func_demo.py` | Replaceable with any risk control scoring logic | Supports ML models and anomaly detection |
+| Knock-Out Judgment Strategy | Conditional logic in `pricing_model.py` | Can be modified to output AI model risk levels | Dynamic parameter configuration |
+| Payout Path | Knock-out path branch in `pricing_model.py` | Can be set to multi-level payouts (mild/severe) | Cap mechanism optimization |
+| Parameter Settings | Constants area in `pricing_model.py` | Premium π, discount rate r, etc. can be modified | Modular parameter management |
+| Report Generation | New HTML report functionality | Automatically generates professional analysis reports | Completely new addition |
+
+---
+
+## 📈 Model Visualization and Path Simulation
+
+* The structural pricing model provides knock-out probability $p$ and expected value function graphs:
 
   $$
-  \text{Expected Value} = (1 - p) \cdot V_{\text{正常}} + p \cdot V_{\text{敲出}}
+  \text{Expected Value} = (1 - p) \cdot V_{\text{Normal}} + p \cdot V_{\text{Knock-out}}
   $$
 
-* **专业可视化**：高质量图表生成，包含统计信息和风险区间标注
-* **交互式报告**：HTML格式详细分析报告，包含：
-  - 核心参数摘要
-  - 敲出概率影响分析
-  - 统计摘要和风险指标
-  - 投资建议和风险提示
-* **敏感性分析**：自动测试关键参数变化对结构价值的影响
+* **Professional Visualization**: High-quality chart generation, including statistical information and risk interval annotations
+* **Interactive Reports**: Detailed analysis reports in HTML format, including:
+  - Core parameter summary
+  - Knock-out probability impact analysis
+  - Statistical summary and risk indicators
+  - Investment recommendations and risk alerts
+* **Sensitivity Analysis**: Automatic testing of the impact of key parameter changes on structure value
 
 ---
 
-## 📦 项目扩展方向
+## 📦 Project Extension Directions
 
-* 可将评分函数接入实时报价、企业财报或自然语言处理模块（NLP）
-* 可在结构基础上添加"信用改善奖励条款"或"中止再发行机制"
-* 可与链上智能合约系统结合，实现结构合约 + 风控评分透明化
-* **新增方向**：机器学习增强、专业级报告系统、多资产组合优化
+* The scoring function can be connected to real-time quotations, corporate financial reports, or natural language processing (NLP) modules
+* "Credit improvement reward clauses" or "termination and reissuance mechanisms" can be added to the structure
+* Can be combined with on-chain smart contract systems to achieve transparency in structural contracts and risk control scoring
+* **New Directions**: Machine learning enhancement, professional reporting systems, multi-asset portfolio optimization
 
 ---
 
-## 🧠 结语
+## 🧠 Conclusion
 
-本结构票据旨在展示：如何通过结构语言实现对复杂信用事件的自动响应与风险控制。
-它不仅是一份产品，更是一种可以嵌套、演化、仿真、部署的结构设计语言雏形。
+This structured note aims to demonstrate how structural language can be used to implement automatic responses and risk control for complex credit events.
+It is not just a product, but a prototype of a structural design language that can be nested, evolved, simulated, and deployed.
 
-**技术成就**：通过模块化设计和专业级实现，该项目已达到金融工程教学和实际应用的双重标准。
+**Technical Achievement**: Through modular design and professional implementation, this project has achieved dual standards for financial engineering education and practical application.
 
-> Structured-1400 · Day002 出品  
-> 构造目标：信用事件结构反应原型 + 保费驱动型风险系统  
-> 作者：用户 / GitHub Copilot 联合结构工程师
+> Structured-1400 · Day002 Product  
+> Construction Objective: Credit Event Structural Response Prototype + Premium-Driven Risk System  
+> Authors: User / GitHub Copilot Joint Structural Engineers

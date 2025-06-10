@@ -1,77 +1,76 @@
 # Scenario Examples — Adaptive Margin-Control Note
-**结构运行情境图文示例**
 
 ---
 
-## 🎯 概述
+## 🎯 Overview
 
-以下展示 Adaptive Margin-Control Note 在 4 种典型市场路径下的触发逻辑、资金池动态与最终收益行为，结合模拟图像帮助理解结构行为。
+The following illustrates the triggering logic, fund pool dynamics, and final yield behavior of the Adaptive Margin-Control Note under four typical market paths, accompanied by simulation images for better understanding.
 
 ---
 
-## 📈 情景一：强势上涨 → 敲入 → 收益封顶
+## 📈 Scenario 1: Strong Uptrend → Knock-In → Yield Cap
 
-- 标的资产持续上涨，超过 +20% 敲入点
-- 超过 +30% 的收益被封顶，转入资金池
-- 客户获得 +30% 收益，资金池积累可用于未来补仓
-- 模拟中使用随机波动率：波动率均值回归速度κ=3.0，长期均值θ=20%
+- The underlying asset continues to rise, exceeding the +20% knock-in threshold.
+- Returns exceeding +30% are capped and transferred to the fund pool.
+- The client receives a +30% yield, and the fund pool accumulates for future margin replenishment.
+- Simulation uses stochastic volatility: mean reversion speed κ=3.0, long-term mean θ=20%.
 
-**图示：**
+**Illustration:**
 
 ![scenario1](./simulation_charts/scenario1_price_path.png)
 
 ---
 
-## 📉 情景二：上涨后回落 → 自动补仓 → 持仓续命
+## 📉 Scenario 2: Uptrend Followed by Decline → Automatic Margin Replenishment → Position Sustained
 
-- 起初上涨超过 +20%，敲入触发，积累资金池
-- 随机波动率变化导致市场波动性增加
-- 价格下跌接近维持保证金线(5%)
-- 系统自动调用资金池进行补仓 → 避免强平
-- 最终仍持仓至到期，获得回升后的收益
+- Initial rise exceeds +20%, triggering knock-in and fund pool accumulation.
+- Random volatility changes lead to increased market fluctuations.
+- Price drops close to the maintenance margin line (5%).
+- The system automatically utilizes the fund pool for margin replenishment → avoids forced liquidation.
+- Ultimately, the position is held until maturity, yielding post-recovery returns.
 
-**图示：**
+**Illustration:**
 
 ![scenario2](./simulation_charts/scenario2_price_path.png)
 
 ---
 
-## ⚠️ 情景三：未敲入 → 市场暴跌 → 爆仓终止
+## ⚠️ Scenario 3: No Knock-In → Market Crash → Forced Liquidation
 
-- 标的资产最高涨幅未超过 +20%，未敲入
-- 出现跳跃式下跌（跳跃频率λ=5，平均跳跃大小=-1%）
-- 账户权益低于维持保证金(5%)
-- 因无资金池可补仓 → 强平触发 → 结构终止
+- The underlying asset's maximum growth does not exceed +20%, no knock-in.
+- A sudden drop occurs (jump frequency λ=5, average jump size=-1%).
+- Account equity falls below the maintenance margin (5%).
+- Due to an empty fund pool → forced liquidation is triggered → structure terminates.
 
-**图示：**
+**Illustration:**
 
 ![scenario3](./simulation_charts/scenario3_price_path.png)
 
 ---
 
-## 🛠️ 情景四：敲入后用户主动补仓 → 成功保留权益
+## 🛠️ Scenario 4: Knock-In Followed by Client-Initiated Margin Replenishment → Equity Preserved
 
-- 市场前期上涨触发敲入，资金池积累
-- 波动率突然上升(波动率的波动率ξ=30%)导致中途下跌接近风险区
-- 客户主动操作：手动从池中注入资金补仓
-- 最终未触发终止，持有至期满
+- Early market rise triggers knock-in, accumulating the fund pool.
+- Sudden volatility increase (volatility of volatility ξ=30%) leads to mid-term decline nearing risk zones.
+- Client manually operates: injects funds from the pool for margin replenishment.
+- Ultimately, termination is avoided, and the position is held until maturity.
 
-**图示：**
+**Illustration:**
 
 ![scenario4](./simulation_charts/scenario4_price_path.png)
 
 ---
 
-## 🧠 情景对比小结
+## 🧠 Scenario Comparison Summary
 
-| 情景编号 | 是否敲入 | 是否触发补仓 | 是否终止 | 客户结果 | 关键风险因素 |
-|----------|----------|--------------|----------|----------|--------------|
-| 1        | ✅ 是    | ❌ 否         | ❌ 否    | 收益 +30%，资金池积累 | 波动率稳定 |
-| 2        | ✅ 是    | ✅ 自动       | ❌ 否    | 收益保留，避免终止 | 波动率上升 |
-| 3        | ❌ 否    | ❌ 无池       | ✅ 是    | 强平爆仓，残值结算 | 价格跳跃 |
-| 4        | ✅ 是    | ✅ 手动       | ❌ 否    | 收益完整，策略防御成功 | 波动率突变 |
+| Scenario No. | Knock-In | Margin Replenishment | Termination | Client Outcome | Key Risk Factors |
+|--------------|----------|----------------------|-------------|----------------|------------------|
+| 1            | ✅ Yes   | ❌ No               | ❌ No       | Yield +30%, fund pool accumulates | Stable volatility |
+| 2            | ✅ Yes   | ✅ Automatic        | ❌ No       | Yield preserved, termination avoided | Rising volatility |
+| 3            | ❌ No    | ❌ None             | ✅ Yes      | Forced liquidation, residual settlement | Price jumps |
+| 4            | ✅ Yes   | ✅ Manual           | ❌ No       | Full yield, successful defensive strategy | Sudden volatility |
 
 ---
 
-📌 图像由 Python 模拟产生，位于 `./simulation_charts/` 文件夹中。可配合 `pricing_model.py` 使用参数修改并重生成。
+📌 Images are generated via Python simulation, located in the `./simulation_charts/` folder. Parameters can be modified and regenerated using `pricing_model.py`.
 

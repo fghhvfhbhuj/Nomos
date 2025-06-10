@@ -1,106 +1,102 @@
 # Adaptive Margin-Control Note
 
-## Term Sheet（结构条款说明书）
+## Term Sheet
 
-### 产品名称
+### Product Name
 
-Adaptive Margin-Control Note（自适应保证金控制票据）
+Adaptive Margin-Control Note
 
-### 产品类型
+### Product Type
 
-结构化衍生品票据（路径依赖 + 内嵌资金池 + 用户可控补仓）
+Structured Derivative Note (Path-Dependent + Embedded Fund Pool + User-Controlled Margin Replenishment)
 
-### 标的资产
+### Underlying Assets
 
-沪深300指数 / 黄金期货 / 铜期货（任选一种，具体产品中明示）
+CSI 300 Index / Gold Futures / Copper Futures (select one, specified in the product details)
 
-### 投资币种
+### Investment Currency
 
-人民币（CNY） / 美元（USD）
+Chinese Yuan (CNY) / US Dollar (USD)
 
-### 投资期限
+### Investment Term
 
-12个月（T = 1年）
+12 months (T = 1 year)
 
-### 最小投资金额
+### Minimum Investment Amount
 
-￥100,000 起步（或等值美元）
+¥100,000 (or equivalent in USD)
 
-### 收益结构
+### Yield Structure
 
-* 标的资产涨幅 $R_t$ = $(S_t - S_0)/S_0$
-* 若 $R_t < 20%$，按实际涨幅线性分配
-* 若 $R_t \geq 20%$，则触发敲入
+* Underlying asset growth $R_t$ = $(S_t - S_0)/S_0$
+* If $R_t < 20%$, linear distribution based on actual growth
+* If $R_t \geq 20%$, knock-in is triggered:
+  * Yield cap set at 30%
+  * Excess beyond 30% is allocated to the Protection Pool
 
-  * 收益封顶为 30%
-  * 超过 30% 的部分进入风险补偿资金池（Protection Pool）
+### Knock-In Clause
 
-### 敲入条款（Knock-In）
+* Trigger Condition: Cumulative growth of the underlying asset exceeds 20%
+* Effect: Automatically activates the yield cap mechanism (30%)
+* Excess returns are transferred to the fund pool for subsequent margin replenishment
 
-* 触发条件：标的资产累计涨幅超过 20%
-* 效果：自动启动收益封顶机制（30%）
-* 同时将超额收益转入资金池，可用于后续补仓
+### Protection Pool Mechanism
 
-### 资金池机制（Protection Pool）
+* Initially empty
+* Excess returns post-knock-in are transferred to the pool
+* Clients can choose:
+  * No utilization
+  * One-time injection into the margin account
+  * Partial withdrawal for "lifeline" purposes
 
-* 起始为空
-* 敲入后超额收益转入
-* 客户可选择：
+### Margin Mechanism and Automatic Replenishment
 
-  * 不动用
-  * 一次性注入保证金账户
-  * 部分提取用于“续命”
+* Initial margin is 10% of the investment principal
+* Maintenance margin line is 5% of the principal
+* If account equity falls below the maintenance margin line:
+  * The system automatically utilizes the fund pool for margin replenishment
+  * If the fund pool is insufficient, replenishment is performed to the maximum extent possible
+  * If equity remains below the maintenance line post-replenishment, knock-out is triggered
 
-### 保证金机制与自动补仓
+### Knock-Out Clause
 
-* 初始保证金为投资本金的10%
-* 维持保证金线为本金的5%
-* 若账户权益跌破维持保证金线：
+* Trigger Condition: Equity falls below the maintenance margin line and the fund pool is empty
+* Effect: Product terminates, remaining equity is returned upon settlement
 
-  * 系统将自动调用资金池进行补仓
-  * 若资金池不足，则补至最大能力
-  * 若补仓后仍低于维持线，则触发敲出
+### User Control Rights
 
-### 敲出条款（Knock-Out / Termination）
+* Users can access the system platform or designated interface to:
+  * View fund pool balance
+  * Initiate injection requests
+  * Configure automatic or manual margin replenishment strategies
 
-* 触发条件：权益低于维持保证金线 且 资金池为空
-* 效果：产品终止，结算时返还剩余权益
+### Risk Disclosure (Summary)
 
-### 用户控制权
+* This product is not capital-guaranteed. Based on model analysis, the Value at Risk (VaR) at a 95% confidence level is -32.38%
+* In extreme cases, the VaR at a 99% confidence level can reach -42.74%
+* Average maximum drawdown is 27.64%, knock-in probability is 33.43%
+* Involves leverage mechanisms, futures-based underlying assets, and dynamic fund pool structures
+* Investors must possess derivative investment experience and risk tolerance
 
-* 用户可在系统平台或指定界面：
+### Pricing Methodology
 
-  * 查看资金池余额
-  * 发起注入请求
-  * 配置自动或手动补仓策略
+* Monte Carlo simulation (10,000 paths) is used to simulate the underlying asset paths
+* Jump diffusion model (jump frequency λ=5, average jump size=-1%, standard deviation=3%)
+* Combined with stochastic volatility model (mean reversion speed κ=3.0, long-term mean θ=0.2, volatility of volatility ξ=0.3)
+* Final yield expectation is calculated as a reference for theoretical issuance price
+* Current theoretical value is -1.38 (based on simulation parameters)
 
-### 风险提示（简要）
+### Example Scenarios (Optional Diagrams)
 
-* 本产品非资本保证，根据模型分析，95%置信水平下的风险价值(VaR)为-32.38%
-* 极端情况下，99%置信水平的VaR可达-42.74%
-* 平均最大回撤为27.64%，敲入概率为33.43%
-* 涉及杠杆机制、期货标的、资金池动态结构
-* 投资者需具备衍生品投资经验与风险承受能力
+1. Normal growth → Knock-in → Yield cap + Fund pool filled
+2. Market reversal → Approaching forced liquidation → Client initiates or automatic margin replenishment
+3. Market fluctuation → Final holding until maturity → Settlement based on actual path
 
-### 定价方式
+### Project Status
 
-* 使用蒙特卡洛模拟（10,000路径）对标的资产路径进行仿真
-* 采用跳跃扩散模型（跳跃频率λ=5，跳跃平均大小=-1%，标准差=3%）
-* 结合随机波动率模型（均值回归速度κ=3.0，长期均值θ=0.2，波动率的波动率ξ=0.3）
-* 计算最终收益期望，作为理论发行价格参考
-* 当前理论价值为-1.38（基于模拟参数）
-
-### 示例场景图（可附图）
-
-1. 正常上涨 → 敲入 → 收益封顶 + 池子注满
-2. 市场反转 → 接近强平 → 客户主动或自动补仓
-3. 市场震荡 → 最终仍持仓到期 → 按实际路径结算
-
-### 项目状态
-
-模拟设计，用于结构设计作品展示与GitHub项目发布。
-非真实发行产品，仅用于教学与研究用途。
+Simulation design for structured product demonstration and GitHub project release.
+Not a real issuance product, intended for educational and research purposes only.
 
 ---
 
-（此Term Sheet可配合白皮书、定价模型、风险说明一起提交）
+(This Term Sheet can be submitted alongside the whitepaper, pricing model, and risk disclosure.)

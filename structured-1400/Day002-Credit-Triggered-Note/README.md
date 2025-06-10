@@ -1,100 +1,100 @@
 # Credit-Triggered Redemption Note
 
-## 📘 项目简介
+## 📘 Project Overview
 
-本项目为 Structured-1400 系列中第 002 号结构产品，设计目标是创建一个**基于信用事件触发的自动赔付型结构票据**，以教学化、可定制、可视化的方式展示结构化金融产品从逻辑设计到定价建模的完整流程。
+This project is part of the Structured-1400 series, specifically the second structured product, designed to create a **credit-event-triggered automatic payout structured note**. It aims to provide an educational, customizable, and visualized demonstration of the complete process of structured financial product design, from logical construction to pricing modeling.
 
-该项目采用模块化设计，支持敏感性分析和专业级报告生成，适用于金融工程教学、研究和实际产品开发。
+The project adopts a modular design, supports sensitivity analysis, and generates professional-grade reports, making it suitable for financial engineering education, research, and real-world product development.
 
 ---
 
-## 📌 核心结构逻辑
+## 📌 Core Structural Logic
 
-* 客户购买结构票据后进入**观察期**（默认15日），在此期间不计收益，但资金将于结构未敲出时获得**贴现补偿金**（利息年化贴现）
-* 若观察期后未触发敲出，结构转入主收益路径，最终收回本金与约定收益（含观察期补偿）
-* 若在任意时点触发**风控敲出机制**，则立即终止并向用户支付：
+* Upon purchasing the structured note, clients enter an **observation period** (default: 15 days). During this period, no returns are accrued, but funds receive **discount compensation** (annualized interest discount) if the structure does not knock out.
+* If no knock-out event occurs after the observation period, the structure transitions to the main return path, ultimately delivering principal and agreed returns (including observation period compensation).
+* If the **risk-control knock-out mechanism** is triggered at any point, the structure terminates immediately, paying:
 
 $$
-\text{贴现后的未来现金流} + \text{信用风险溢价（保费）}
+\text{Discounted Future Cash Flows} + \text{Credit Risk Premium (Insurance)}
 $$
 
-**最新模型计算结果：**
-- 正常路径价值: ¥104,816.22
-- 观察期补偿: ¥205.69  
-- 敲出赔付价值: ¥109,816.22
+**Latest Model Results:**
+- Normal Path Value: ¥104,816.22
+- Observation Period Compensation: ¥205.69
+- Knock-Out Payout Value: ¥109,816.22
 
 ---
 
-## 🧠 教学目标
+## 🧠 Educational Objectives
 
-本项目面向衍生品结构设计方向学习者，涵盖以下目标：
+This project is tailored for learners focusing on structured product design, covering the following objectives:
 
-* 学习如何构建路径触发型结构产品逻辑（观察期+风控敲出+赔付结构）
-* 理解如何在合约中嵌入**风险管理逻辑**与"反套利设计"
-* 演示如何使用 Python 编写结构票据的**定价模型与概率敏感分析**
-* 提供可插拔的风控打分函数模板，供用户自定义触发机制
-* 展示专业级金融建模和报告生成能力
-
----
-
-## 🗂 文件说明
-
-### 核心文档
-* `README.md`：项目总览和使用说明
-* `term-sheet.md`：结构条款说明书（正式合约语言表达）
-* `whitepaper.md`：设计原理白皮书，包含结构逻辑、模型设计、可替换函数结构
-* `scenario-example.md`：示例场景说明：正常到期 / 风控敲出路径
-
-### 代码文件  
-* `pricing_model.py`：**核心定价模型**，包含模块化参数设定、敏感性分析、专业可视化
-* `risk_score_func_demo.py`：增强版信用打分函数，支持机器学习和异常检测
-
-### 输出文件
-* `ctn_pricing_visualization.png`：**高质量可视化图表**（敲出概率vs期望价值关系）
-* `pricing_report.html`：**专业分析报告**，包含详细统计、风险分析和投资建议
-* `pricing_model.log`：运行日志，记录所有计算过程和结果
+* Learn how to construct path-triggered structured product logic (observation period + risk-control knock-out + payout structure).
+* Understand how to embed **risk management logic** and "anti-arbitrage design" into contracts.
+* Demonstrate how to use Python to develop **pricing models and probability sensitivity analysis** for structured notes.
+* Provide a pluggable risk-scoring function template for users to customize trigger mechanisms.
+* Showcase professional-grade financial modeling and report generation capabilities.
 
 ---
 
-## 🚀 快速开始
+## 🗂 File Description
 
-### 运行定价模型
+### Core Documents
+* `README.md`: Project overview and usage instructions.
+* `term-sheet.md`: Structured terms sheet (formal contract language).
+* `whitepaper.md`: Design principle whitepaper, including structural logic, model design, and replaceable function structures.
+* `scenario-example.md`: Scenario examples: normal maturity / risk-control knock-out paths.
+
+### Code Files
+* `pricing_model.py`: **Core Pricing Model**, featuring modular parameter settings, sensitivity analysis, and professional visualization.
+* `risk_score_func_demo.py`: Enhanced credit scoring function supporting machine learning and anomaly detection.
+
+### Output Files
+* `ctn_pricing_visualization.png`: **High-quality visualization chart** (knock-out probability vs expected value relationship).
+* `pricing_report.html`: **Professional analysis report**, including detailed statistics, risk analysis, and investment recommendations.
+* `pricing_model.log`: Execution log recording all calculation processes and results.
+
+---
+
+## 🚀 Quick Start
+
+### Run the Pricing Model
 ```bash
 python pricing_model.py
 ```
 
-### 模型特性
-- ✅ **模块化设计**：参数可灵活配置
-- ✅ **敏感性分析**：自动分析关键参数影响
-- ✅ **专业可视化**：高质量图表生成
-- ✅ **详细报告**：HTML格式专业分析报告
-- ✅ **日志记录**：完整的运行过程追踪
+### Model Features
+- ✅ **Modular Design**: Flexible parameter configuration.
+- ✅ **Sensitivity Analysis**: Automatic analysis of key parameter impacts.
+- ✅ **Professional Visualization**: High-quality chart generation.
+- ✅ **Detailed Reporting**: HTML-format professional analysis reports.
+- ✅ **Log Tracking**: Comprehensive execution process tracking.
 
 ---
 
-## 🧩 项目定位与使用
+## 🧩 Project Positioning and Usage
 
-该产品用于教学、研究与结构建模演示，特别适合：
+This product is intended for education, research, and structured modeling demonstrations, particularly suitable for:
 
-- **金融工程专业**学生的课程项目和毕业设计
-- **量化金融**研究人员的产品原型开发
-- **结构化产品**设计团队的概念验证
-- **风险管理**部门的压力测试和情景分析
+- **Financial Engineering** students' course projects and theses.
+- **Quantitative Finance** researchers' product prototype development.
+- **Structured Product** design teams' concept validation.
+- **Risk Management** departments' stress testing and scenario analysis.
 
-实际使用时建议结合实际风险引擎、监管规则及法务体系定制部署。
-
----
-
-## 📊 技术亮点
-
-* **数学建模**：基于随机过程和概率论的严谨定价框架
-* **风险控制**：多层次风险管理机制（观察期+敲出+封顶）
-* **可视化分析**：专业级图表和交互式报告
-* **代码质量**：模块化、可扩展、文档完整的Python实现
+For practical use, it is recommended to integrate with actual risk engines, regulatory frameworks, and legal systems for customized deployment.
 
 ---
 
-> 本项目为 Structured-1400 系列 · Day002 结构票据作品  
-> 构造人：用户 / GitHub Copilot  
-> 类型：结构票据 · 信用触发 · 风控熔断型  
-> 适用场景：教学研究 · 产品原型 · 风险建模
+## 📊 Technical Highlights
+
+* **Mathematical Modeling**: Rigorous pricing framework based on stochastic processes and probability theory.
+* **Risk Control**: Multi-layered risk management mechanisms (observation period + knock-out + cap).
+* **Visualization Analysis**: Professional-grade charts and interactive reports.
+* **Code Quality**: Modular, extensible, and well-documented Python implementation.
+
+---
+
+> This project is part of the Structured-1400 series · Day002 Structured Note  
+> Creator: User / GitHub Copilot  
+> Type: Structured Note · Credit-Triggered · Risk-Control Knock-Out  
+> Applicable Scenarios: Educational Research · Product Prototyping · Risk Modeling

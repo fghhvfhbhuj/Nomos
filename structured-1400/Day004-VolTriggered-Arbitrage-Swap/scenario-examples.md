@@ -1,82 +1,76 @@
-# 衍生品结构 Day004 场景示例说明（Scenario Examples）
+# Derivative Structure Day004 Scenario Examples
 
-本节旨在通过具体场景示例，展示 Day004 波动率触发型多角货币套利结构在不同市场条件下的表现，以辅助理解结构执行机制与实际可能带来的套利行为。
-
----
-
-## 场景一：高波动率触发套利路径
-
-* **市场背景**：美元兑日元货币对在全球市场出现剧烈波动，套利收益率达到 0.0023。
-* **结构反应**：
-
-  * 达到敲入阈值 d=0.002，立即进入套利状态；
-  * 选择路径为 USD → JPY → CNY → GBP → USD；
-  * 系统检测路径汇率为：1 → 110.0 → 6.45 → 0.72 → 1.0032
-  * 每次交易手续费 0.001，4次交易总手续费为 0.004，套利净收益为 -0.0008
-  * 但因波动率导致的套利收益超过阈值，触发结构
-* **执行行为**：
-
-  * 用户在 3 分钟内通过外汇互换锁定远期回币价格；
-  * 预计收益锁定为本金的 0.3%
+This section aims to demonstrate the performance of the Day004 Volatility-Triggered Multi-Currency Arbitrage Structure under different market conditions through specific scenario examples, helping to understand the structure's execution mechanism and potential arbitrage behaviors.
 
 ---
 
-## 场景二：高波动触发后套利收益迅速收缩，敲出退出
+## Scenario 1: High Volatility Triggering Arbitrage Path
 
-* **市场背景**：人民币对美元在非农数据公布后剧烈波动，形成短期套利窗口，但套利路径在 20 分钟内收益回落。
-* **结构反应**：
-
-  * 初始时套利收益率达到 0.0025，超过敲入阈值 d=0.002，敲入路径执行；
-  * 执行后监控套利期望收益跌至 0.0004；
-  * 触发敲出阈值 z=0.0005，系统强制退出套利路径；
-* **执行行为**：
-
-  * 若用户尚未完成互换操作，则退出时无收益；
-  * 若已完成互换，则以已锁定价格结算套利回币；
-
----
-
-## 场景三：套利路径过于复杂导致总手续费过高
-
-* **市场背景**：尝试使用 6币种路径（USD → EUR → JPY → CNY → GBP → USD）
-* **结构反应**：
-
-  * 虽然部分路径局部套利空间存在，但总手续费为 6 × 0.001 = 0.006，路径套利收益仅为 0.0042；
-  * 净收益为 -0.0018，未能超过敲入阈值 d=0.002，总体未敲入；
-* **执行行为**：
-
-  * 系统继续监听其他路径，未激活结构；
+* **Market Background**: The USD/JPY currency pair experiences severe volatility in global markets, with arbitrage yield reaching 0.0023.
+* **Structure Response**:
+  * Reaches knock-in threshold d=0.002, immediately enters arbitrage state
+  * Selects path: USD → JPY → CNY → GBP → USD
+  * System detects path exchange rates: 1 → 110.0 → 6.45 → 0.72 → 1.0032
+  * Transaction fee per trade is 0.001, total fee for 4 trades is 0.004, net arbitrage yield is -0.0008
+  * However, due to volatility, the arbitrage yield exceeds the threshold, triggering the structure
+* **Execution Behavior**:
+  * User locks in forward currency return prices through foreign exchange swaps within 3 minutes
+  * Expected profit locked at 0.3% of principal
 
 ---
 
-## 场景四：GARCH 波动率模型预测的高波动率环境
+## Scenario 2: High Volatility Followed by Rapid Arbitrage Yield Compression, Knock-Out Exit
 
-* **市场背景**：
-  * GARCH(1,1) 模型预测未来 30 天内货币对波动率将显著上升
-  * 当前波动率已开始攀升，套利路径开始出现
-* **结构反应**：
-  * 系统预测套利机会即将出现，提前准备路径执行资源
-  * 当套利收益率突破 d=0.002 时，立即触发敲入
-* **执行行为**：
-  * 系统根据 GARCH 模型预测的波动率路径，优化执行时机
-  * 预期持有期为 15 天左右，然后波动率回落触发敲出
-
----
-
-## 场景五：国家干预阻力函数限制极端收益
-
-* **市场背景**：
-  * 某货币对出现极端波动，理论上可能带来较高套利收益
-  * 但因国家干预阻力函数 $intervention = -0.01 \cdot \tanh(deviation \cdot 10)$ 的存在
-* **结构反应**：
-  * 系统模拟中，极端收益被阻力函数抑制
-  * 实际收益率波动被控制在更合理的范围内
-* **执行行为**：
-  * 系统选择更稳健的套利路径，避免可能遭受政府干预的极端情况
-  * 在收益率回落至 z=0.0005 前完成互换锁定
+* **Market Background**: CNY against USD experiences severe volatility after non-farm payroll data release, creating a short-term arbitrage window, but the arbitrage path yield falls within 20 minutes.
+* **Structure Response**:
+  * Initial arbitrage yield reaches 0.0025, exceeding knock-in threshold d=0.002, initiating path execution
+  * After execution, monitored expected arbitrage yield drops to 0.0004
+  * Triggers knock-out threshold z=0.0005, system forces exit from arbitrage path
+* **Execution Behavior**:
+  * If user has not completed swap operation, there is no yield at exit
+  * If swap is completed, arbitrage return is settled at the locked-in price
 
 ---
 
-## 结语
+## Scenario 3: Overly Complex Arbitrage Path Leading to Excessive Total Fees
 
-通过上述五种不同场景示例，可以更清晰理解 Day004 波动率触发型结构在不同市场环境、路径设置与操作效率下的表现与挑战。这些场景都是基于 pricing_model.py 中实现的模型功能，包括静态波动率和 GARCH 波动率模型，以及国家干预阻力函数等特性。
+* **Market Background**: Attempting to use a 6-currency path (USD → EUR → JPY → CNY → GBP → USD)
+* **Structure Response**:
+  * Although partial arbitrage opportunities exist in certain segments, total fees amount to 6 × 0.001 = 0.006, while path arbitrage yield is only 0.0042
+  * Net yield is -0.0018, failing to exceed knock-in threshold d=0.002, structure remains inactive
+* **Execution Behavior**:
+  * System continues monitoring other paths, structure not activated
+
+---
+
+## Scenario 4: High Volatility Environment Predicted by GARCH Model
+
+* **Market Background**:
+  * GARCH(1,1) model predicts significant increase in currency pair volatility over the next 30 days
+  * Current volatility has begun to rise, arbitrage paths starting to emerge
+* **Structure Response**:
+  * System predicts imminent arbitrage opportunities, prepares path execution resources in advance
+  * When arbitrage yield breaks through d=0.002, knock-in is immediately triggered
+* **Execution Behavior**:
+  * System optimizes execution timing based on volatility path predicted by GARCH model
+  * Expected holding period around 15 days, followed by knock-out when volatility subsides
+
+---
+
+## Scenario 5: National Intervention Resistance Function Limiting Extreme Yields
+
+* **Market Background**:
+  * A currency pair experiences extreme volatility, theoretically offering high arbitrage yields
+  * But due to the national intervention resistance function $intervention = -0.01 \cdot \tanh(deviation \cdot 10)$
+* **Structure Response**:
+  * In system simulation, extreme yields are suppressed by the resistance function
+  * Actual yield fluctuations are controlled within a more reasonable range
+* **Execution Behavior**:
+  * System selects more robust arbitrage paths, avoiding extreme situations susceptible to government intervention
+  * Completes swap lock-in before yield falls to z=0.0005
+
+---
+
+## Conclusion
+
+Through the above five different scenario examples, we can more clearly understand the performance and challenges of the Day004 Volatility-Triggered Structure under different market environments, path settings, and operational efficiencies. These scenarios are all based on the model functions implemented in pricing_model.py, including static volatility and GARCH volatility models, as well as features like the national intervention resistance function.

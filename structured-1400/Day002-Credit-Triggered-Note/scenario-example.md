@@ -1,167 +1,167 @@
 # Scenario Example — Credit-Triggered Note
 
-## 📈 场景 1：正常到期路径
+## 📈 Scenario 1: Normal Maturity Path
 
-### 初始设定：
+### Initial Setup:
 
-* 用户投入本金 ￥100,000
-* 标的为某高收益债券，观察期为15天
-* 总期限 1 年，年票息 10%，季度支付（共4期）
+* User invests principal of ¥100,000
+* Underlying asset is a certain high-yield bond, observation period is 15 days
+* Total term of 1 year, annual coupon rate 10%, paid quarterly (4 payments)
 
-### 路径演化：
+### Path Evolution:
 
-1. 用户进入结构票据，冻结期开始（第0\~15天）
-2. 未触发敲出 → 第15天释放观察期贴现补偿金（**实际计算：¥205.69**）
-3. 每季度获得票息：￥2,500，共四次
-4. 到期获得本金返还：￥100,000
+1. User enters the structured note, freeze period begins (Days 0-15)
+2. No knock-out triggered → Day 15 releases observation period discount compensation (**Actual calculation: ¥205.69**)
+3. Quarterly coupon payments: ¥2,500, four times in total
+4. Principal returned at maturity: ¥100,000
 
-### 总结：
+### Summary:
 
-* **实际模型计算结果**：
-  - 正常路径价值：¥104,816.22
-  - 观察期补偿：¥205.69
-  - 总期望价值：¥105,021.91
-* 年化收益率 ≈ 5.02%
-* 结构安全运行，无违约事件
-
----
-
-## 🚨 场景 2：信用评分触发敲出
-
-### 初始设定：
-
-* 同上，用户投入 ￥100,000
-* 第30天，公司披露财报，ICR 和流动比率急剧下降
-
-### 风控路径：
-
-1. 评分函数输出连续 3 天评分 < 50 → 触发敲出
-2. **系统自动计算**：
-   - 剩余现金流贴现价值：¥104,816.22
-   - 风险溢价保费：¥5,000
-   - **总赔付金额：¥109,816.22**
-3. 用户自动获得赔付，结构终止，不再参与后续波动
-
-### 总结：
-
-* 用户获得 ¥109,816.22，相对本金收益 +9.82%
-* 结构在信用风险暴露前主动熔断，锁定结果
-* **下行保护效果显著**
+* **Actual Model Calculation Results**:
+  - Normal path value: ¥104,816.22
+  - Observation period compensation: ¥205.69
+  - Total expected value: ¥105,021.91
+* Annualized yield ≈ 5.02%
+* Structure operates safely, no default events
 
 ---
 
-## 💬 场景解读建议
+## 🚨 Scenario 2: Credit Score Triggers Knock-Out
 
-| 路径   | 用户体验          | 对应结构优势            | 实际收益 |
+### Initial Setup:
+
+* Same as above, user invests ¥100,000
+* On Day 30, company releases financial reports, ICR and current ratio decline sharply
+
+### Risk Control Path:
+
+1. Scoring function outputs score < 50 for 3 consecutive days → Knock-out triggered
+2. **System automatically calculates**:
+   - Discounted value of remaining cash flows: ¥104,816.22
+   - Risk premium: ¥5,000
+   - **Total payout amount: ¥109,816.22**
+3. User automatically receives payout, structure terminates, no further participation in subsequent fluctuations
+
+### Summary:
+
+* User receives ¥109,816.22, a return of +9.82% relative to principal
+* Structure actively circuit-breaks before credit risk exposure, securing the outcome
+* **Significant downside protection effect**
+
+---
+
+## 💬 Scenario Interpretation Guide
+
+| Path | User Experience | Corresponding Structural Advantage | Actual Return |
 | ---- | ------------- | ----------------- | ------ |
-| 正常路径 | 获得所有票息，收益封闭可期 | 观察期返还提升认知合理性      | +5.02% |
-| 敲出路径 | 无需主动操作，自动触发赔付 | 风控机制透明、可调、用户信任感增强 | +9.82% |
+| Normal Path | Receives all coupons, anticipates enclosed returns | Observation period reimbursement enhances perceived reasonability | +5.02% |
+| Knock-out Path | No active operation required, automatic payout triggered | Transparent, adjustable risk control mechanism, enhanced user trust | +9.82% |
 
 ---
 
-## 📊 敏感性分析场景
+## 📊 Sensitivity Analysis Scenarios
 
-### 场景 3：不同敲出概率下的期望表现
+### Scenario 3: Expected Performance Under Different Knock-Out Probabilities
 
-基于最新模型的敏感性分析结果：
+Sensitivity analysis results based on the latest model:
 
-| 敲出概率 | 期望价值 | 相对本金收益率 | 风险等级 |
+| Knock-Out Probability | Expected Value | Return Relative to Principal | Risk Level |
 |---------|----------|--------------|----------|
-| 0.0%    | ¥105,021.91 | +5.02% | 极低 |
-| 10.0%   | ¥104,501.33 | +4.50% | 低 |
-| 20.0%   | ¥103,980.75 | +3.98% | 中低 |
-| 30.0%   | ¥103,460.17 | +3.46% | 中等 |
-| 40.0%   | ¥102,939.59 | +2.94% | 中高 |
-| 50.0%   | ¥102,419.01 | +2.42% | 高 |
+| 0.0%    | ¥105,021.91 | +5.02% | Very Low |
+| 10.0%   | ¥104,501.33 | +4.50% | Low |
+| 20.0%   | ¥103,980.75 | +3.98% | Medium-Low |
+| 30.0%   | ¥103,460.17 | +3.46% | Medium |
+| 40.0%   | ¥102,939.59 | +2.94% | Medium-High |
+| 50.0%   | ¥102,419.01 | +2.42% | High |
 
-### 关键观察：
-- **下行保护**：即使在最高敲出概率(50%)下，投资者仍获得正收益
-- **风险补偿**：敲出概率越高，风险溢价越显著
-- **稳定性**：收益波动范围控制在合理区间内
-
----
-
-## 🔬 技术验证场景
-
-### 场景 4：模型技术特性展示
-
-**自动化报告生成**：
-- 系统自动生成专业HTML报告：`pricing_report.html`
-- 包含详细的统计分析、风险指标和投资建议
-- 专业级图表展示敲出概率与期望价值关系
-
-**敏感性分析**：
-- 自动测试贴现率变化对结构价值的影响
-- 分析风险溢价调整的效果
-- 提供参数优化建议
-
-**可视化效果**：
-- 高质量图表：`ctn_pricing_visualization.png`
-- 包含统计信息和风险区间标注
-- 专业级金融图表样式
+### Key Observations:
+- **Downside Protection**: Even at the highest knock-out probability (50%), investors still achieve positive returns
+- **Risk Compensation**: Higher knock-out probabilities correspond to more significant risk premiums
+- **Stability**: Return fluctuation range is controlled within a reasonable interval
 
 ---
 
-## 🎯 教学应用场景
+## 🔬 Technical Verification Scenarios
 
-### 场景 5：课堂演示使用
+### Scenario 4: Model Technical Features Demonstration
 
-**快速演示**：
+**Automated Report Generation**:
+- System automatically generates professional HTML reports: `pricing_report.html`
+- Includes detailed statistical analysis, risk indicators, and investment recommendations
+- Professional-grade charts displaying relationship between knock-out probability and expected value
+
+**Sensitivity Analysis**:
+- Automatically tests the impact of discount rate changes on structure value
+- Analyzes the effects of risk premium adjustments
+- Provides parameter optimization recommendations
+
+**Visualization Effects**:
+- High-quality charts: `ctn_pricing_visualization.png`
+- Includes statistical information and risk interval annotations
+- Professional financial chart styling
+
+---
+
+## 🎯 Educational Application Scenarios
+
+### Scenario 5: Classroom Demonstration Usage
+
+**Quick Demonstration**:
 ```bash
 python pricing_model.py
 ```
 
-**输出内容**：
-- 核心计算结果实时显示
-- 专业级可视化图表自动生成
-- 详细分析报告一键生成
-- 完整运行日志记录
+**Output Content**:
+- Core calculation results displayed in real-time
+- Professional-grade visualization charts automatically generated
+- Detailed analysis reports generated with one click
+- Complete runtime logs recorded
 
-**教学价值**：
-- 展示完整的金融工程建模流程
-- 理论与实践相结合的案例
-- 模块化设计便于扩展和修改
-- 适合不同层次的教学需求
-
----
-
-## 📈 可视化结果展示
-
-最新优化后的模型生成了以下专业级输出：
-
-1. **高质量可视化图表** (`ctn_pricing_visualization.png`)
-   - 敲出概率与结构价值关系曲线
-   - 包含最大值、最小值和基准线标注
-   - 专业级图表样式和配色
-
-2. **详细分析报告** (`pricing_report.html`)
-   - 核心参数摘要表格
-   - 敲出概率影响分析
-   - 统计摘要和风险指标
-   - 投资建议和风险提示
-
-3. **运行日志记录** (`pricing_model.log`)
-   - 完整的计算过程追踪
-   - 关键结果和时间戳记录
-   - 便于调试和验证
+**Educational Value**:
+- Demonstrates complete financial engineering modeling process
+- Case study combining theory and practice
+- Modular design facilitates extension and modification
+- Suitable for various levels of educational requirements
 
 ---
 
-## 💡 实际应用建议
+## 📈 Visualization Results Display
 
-### 投资者适用性
-- **保守型投资者**：关注下行保护功能，即使最坏情况仍有正收益
-- **稳健型投资者**：平衡风险与收益，获得合理的风险调整回报
-- **教学研究**：完整的建模框架，适合学术研究和课程教学
+The optimized model has generated the following professional-grade outputs:
 
-### 风险管理要点
-- 敲出机制提供及时的风险控制
-- 观察期设计防止市场套利
-- 赔付封顶机制控制最大损失
-- 透明的评分算法便于风险评估
+1. **High-Quality Visualization Charts** (`ctn_pricing_visualization.png`)
+   - Curve showing relationship between knock-out probability and structure value
+   - Includes maximum value, minimum value, and benchmark line annotations
+   - Professional chart styling and color scheme
+
+2. **Detailed Analysis Report** (`pricing_report.html`)
+   - Core parameter summary table
+   - Knock-out probability impact analysis
+   - Statistical summary and risk indicators
+   - Investment recommendations and risk alerts
+
+3. **Runtime Log Records** (`pricing_model.log`)
+   - Complete calculation process tracking
+   - Key results and timestamp records
+   - Facilitates debugging and verification
 
 ---
 
-> 本示例基于最新优化的定价模型实际运行结果  
-> 所有数值均为模型真实计算输出  
-> 适用于教学演示、学术研究和产品原型开发
+## 💡 Practical Application Recommendations
+
+### Investor Suitability
+- **Conservative Investors**: Focus on downside protection functionality, positive returns even in worst-case scenarios
+- **Balanced Investors**: Balance risk and return, obtain reasonable risk-adjusted returns
+- **Educational Research**: Complete modeling framework, suitable for academic research and course teaching
+
+### Risk Management Key Points
+- Knock-out mechanism provides timely risk control
+- Observation period design prevents market arbitrage
+- Payout cap mechanism controls maximum loss
+- Transparent scoring algorithm facilitates risk assessment
+
+---
+
+> This example is based on actual running results of the latest optimized pricing model  
+> All values are real calculation outputs from the model  
+> Suitable for educational demonstrations, academic research, and product prototype development

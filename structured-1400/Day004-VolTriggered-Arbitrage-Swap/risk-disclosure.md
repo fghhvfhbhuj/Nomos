@@ -1,132 +1,130 @@
-# 衍生品结构 Day004 风险说明书（Risk Statement）
+# Derivative Structure Day004 Risk Disclosure Statement
 
-本文件系统说明本结构性衍生品在设计、执行与交易过程中可能面临的主要风险类别、具体成因、应对策略与敏感性分析。旨在确保投资人及使用机构在使用本产品时，对潜在风险有清晰、全面的认知。
+This document systematically outlines the main risk categories, specific causes, mitigation strategies, and sensitivity analyses that may be encountered in the design, execution, and trading process of this structured derivative. It aims to ensure that investors and institutional users have a clear and comprehensive awareness of potential risks when using this product.
 
 ---
 
-## 一、市场风险（Market Risk）
+## I. Market Risk
 
-### 1️⃣ 汇率波动风险
+### 1️⃣ Exchange Rate Volatility Risk
 
-* 说明：汇率的几何布朗运动虽然具有均值回归倾向，但仍可能因地缘政治、经济政策等非预期事件大幅偏离。
-* 应对：
-  * 通过加入国家调控的"阻力项" $intervention = -0.01 \cdot \tanh(deviation \cdot 10)$ 抑制极端波动概率
-  * 使用 GARCH 波动率模型，更准确地刻画波动率聚集效应
-  * 设计时使用高频数据校准波动率参数（0.0060 ~ 0.0095）
+* **Description**: Although geometric Brownian motion of exchange rates tends to exhibit mean reversion, rates may still deviate significantly due to geopolitical events, economic policies, and other unexpected factors.
+* **Mitigation**:
+  * Implementation of a national intervention "resistance term" $intervention = -0.01 \cdot \tanh(deviation \cdot 10)$ to suppress extreme volatility probability
+  * Utilization of GARCH volatility models to more accurately capture volatility clustering effects
+  * Calibration of volatility parameters (0.0060 ~ 0.0095) using high-frequency data during design
 
-### 2️⃣ 利率变动风险
+### 2️⃣ Interest Rate Fluctuation Risk
 
-* 说明：利率变动将直接影响远期汇率计算与货币互换价格。
-* 应对：动态获取无风险利率，设置容错区间或动态更新触发门槛。
-* 当前模型中包含的利率：
+* **Description**: Interest rate changes directly affect forward exchange rate calculations and currency swap pricing.
+* **Mitigation**: Dynamic acquisition of risk-free rates, setting tolerance intervals, or dynamically updating trigger thresholds.
+* **Current model interest rates**:
   * USD: 0.0300
   * JPY: 0.0010
   * CNY: 0.0250
   * GBP: 0.0350
   * EUR: 0.0200
 
-### 3️⃣ 套利收益率风险
+### 3️⃣ Arbitrage Yield Risk
 
-* 说明：套利收益率可能因市场波动、流动性变化等因素快速缩减。
-* 应对：设定多因子确认机制，并通过敲出阈值 z = 0.0005 及时退出。
-
----
-
-## 二、流动性风险（Liquidity Risk）
-
-### 1️⃣ 交易对手风险
-
-* 说明：若货币互换或路径兑换中任一币种在时点上缺乏对手方，将导致执行失败。
-* 应对：
-
-  * 建立做市商连接与自动报价机制
-  * 使用滑点模型提前估算成交难度，预设容忍范围
-  * 优先选择主要货币对（USD, JPY, CNY, GBP, EUR）进行套利
-
-### 2️⃣ 市场深度不足
-
-* 说明：特别是在执行 n角路径时，可能部分小币种交易深度不足，影响套利可实现性。
-* 应对：
-
-  * 仅限在高流动货币组合执行
-  * 对路径设置信用打分，动态筛除低可实现性组合
-  * 通过手续费参数（fee_per_trade = 0.001）调整套利边际
+* **Description**: Arbitrage yields may rapidly diminish due to market volatility, liquidity changes, and other factors.
+* **Mitigation**: Implementation of multi-factor confirmation mechanisms and timely exit through knock-out threshold z = 0.0005.
 
 ---
 
-## 三、模型风险（Model Risk）
+## II. Liquidity Risk
 
-### 1️⃣ GBM建模误差
+### 1️⃣ Counterparty Risk
 
-* 说明：几何布朗运动仅近似刻画真实市场，特别在跳跃、剧烈波动事件中失效。
-* 应对：
-  * 加入"阻力函数" $intervention$ 修正
-  * 使用 GARCH(1,1) 模型生成动态波动率路径
-  * 未来可加入跳跃扩散过程建模改进
+* **Description**: If any currency in the swap or path exchange lacks counterparties at a specific point in time, execution will fail.
+* **Mitigation**:
+  * Establishment of market maker connections and automated quoting mechanisms
+  * Use of slippage models to estimate execution difficulty in advance and preset tolerance ranges
+  * Prioritization of major currency pairs (USD, JPY, CNY, GBP, EUR) for arbitrage
 
-### 2️⃣ 参数设定不合理
+### 2️⃣ Insufficient Market Depth
 
-* 说明：触发门槛 d = 0.002、敲出门槛 z = 0.0005、模拟路径数目等参数影响重大。
-* 应对：
-  * 提供默认训练参数，并允许企业用户进行自定义与生命周期管理
-  * 通过 10,000 条模拟路径验证参数稳健性
-
-### 3️⃣ 蒙特卡洛样本不足
-
-* 说明：样本路径过少将导致估值偏误。
-* 应对：默认模拟10,000次以上，提供误差置信区间供分析参考。
+* **Description**: Particularly when executing n-angle paths, some minor currencies may have insufficient trading depth, affecting arbitrage feasibility.
+* **Mitigation**:
+  * Execution limited to highly liquid currency combinations
+  * Dynamic filtering of low-feasibility combinations through credit scoring of paths
+  * Adjustment of arbitrage margins through fee parameters (fee_per_trade = 0.001)
 
 ---
 
-## 四、法律与执行风险（Legal & Operational Risk）
+## III. Model Risk
 
-### 1️⃣ 合规性风险
+### 1️⃣ GBM Modeling Errors
 
-* 说明：不同国家对跨币种交易与货币互换监管不同。
-* 应对：使用者需在本地遵守监管；本产品仅作结构展示，非投资建议。
+* **Description**: Geometric Brownian motion only approximates real market behavior and fails particularly during jumps and extreme volatility events.
+* **Mitigation**:
+  * Correction through the "resistance function" $intervention$
+  * Generation of dynamic volatility paths using GARCH(1,1) models
+  * Potential future improvements through jump-diffusion process modeling
 
-### 2️⃣ 执行延迟或失败
+### 2️⃣ Inappropriate Parameter Settings
 
-* 说明：若系统响应滞后于套利机会窗口，则策略失效。
-* 应对：采用高频实时监控，部署在靠近交易所服务器的节点上。
+* **Description**: Trigger threshold d = 0.002, knock-out threshold z = 0.0005, and simulation path quantity significantly impact performance.
+* **Mitigation**:
+  * Provision of default trained parameters with customization options and lifecycle management for enterprise users
+  * Validation of parameter robustness through 10,000 simulated paths
 
-### 3️⃣ 数据延迟或错误
+### 3️⃣ Insufficient Monte Carlo Sampling
 
-* 说明：基础数据若延迟或错误，将导致误判触发时点。
-* 应对：使用高质量数据源，并对历史表现进行回测比对。
+* **Description**: Too few sample paths will lead to valuation bias.
+* **Mitigation**: Default simulation of over 10,000 iterations, providing error confidence intervals for reference.
 
 ---
 
-## 五、敏感性分析（Sensitivity Analysis）
+## IV. Legal & Operational Risk
 
-| 变量     | 影响方向        | 影响程度（高/中/低） | 备注            |
+### 1️⃣ Compliance Risk
+
+* **Description**: Different countries have varying regulations for cross-currency transactions and currency swaps.
+* **Mitigation**: Users must comply with local regulations; this product serves only as a structural demonstration, not investment advice.
+
+### 2️⃣ Execution Delay or Failure
+
+* **Description**: If system response lags behind the arbitrage opportunity window, the strategy becomes ineffective.
+* **Mitigation**: Implementation of high-frequency real-time monitoring, deployed on nodes close to exchange servers.
+
+### 3️⃣ Data Delay or Error
+
+* **Description**: Delayed or erroneous underlying data will lead to misjudgment of trigger points.
+* **Mitigation**: Use of high-quality data sources and backtesting against historical performance.
+
+---
+
+## V. Sensitivity Analysis
+
+| Variable | Impact Direction | Impact Level (High/Medium/Low) | Notes |
 | ------ | ----------- | ----------- | ------------- |
-| 汇率波动性  | 决定路径收益分布    | 高           | 波动率越大越容易触发套利机会   |
-| 利差变化   | 改变远期汇率      | 中           | 利差收窄将压缩套利空间   |
-| 手续费变化  | 降低套利可实现概率   | 中           | 每次交易手续费为 0.001     |
-| n角路径数量 | 增加结构复杂性与收益性 | 高           | 默认路径长度为 4     |
-| 国家干预强度 | 抑制极端情况      | 中           | 通过 tanh 函数实现 |
+| Exchange Rate Volatility | Determines path return distribution | High | Higher volatility more easily triggers arbitrage opportunities |
+| Interest Rate Differential | Alters forward exchange rates | Medium | Narrowing differentials compress arbitrage space |
+| Fee Changes | Reduces arbitrage feasibility probability | Medium | Per-trade fee is 0.001 |
+| N-angle Path Quantity | Increases structural complexity and potential returns | High | Default path length is 4 |
+| National Intervention Intensity | Suppresses extreme scenarios | Medium | Implemented through tanh function |
 
 ---
 
-## 六、GARCH 波动率模型相关风险
+## VI. GARCH Volatility Model Related Risks
 
-### 1️⃣ 模型拟合风险
+### 1️⃣ Model Fitting Risk
 
-* 说明：GARCH 参数估计可能存在误差，导致波动率预测不准确。
-* 应对：定期重新估计模型参数，使用历史数据验证模型拟合效果。
+* **Description**: GARCH parameter estimation may contain errors, leading to inaccurate volatility predictions.
+* **Mitigation**: Regular re-estimation of model parameters and validation of model fit using historical data.
 
-### 2️⃣ 模型复杂性风险
+### 2️⃣ Model Complexity Risk
 
-* 说明：复杂的 GARCH 模型可能导致过拟合。
-* 应对：采用较为简单的 GARCH(1,1) 模型，平衡拟合效果和模型复杂度。
+* **Description**: Overly complex GARCH models may lead to overfitting.
+* **Mitigation**: Adoption of the simpler GARCH(1,1) model, balancing fitting effectiveness and model complexity.
 
 ---
 
-## 七、结语
+## VII. Conclusion
 
-Day004 衍生品在结构设定上虽具备高度可控性与原创性，但其执行成功与否强依赖市场状态与系统部署效率。使用者需严格控制模型参数、数据质量与交易接口响应，以充分发挥其结构优势并规避重大风险。
+While Day004 derivative structure possesses high controllability and originality in its design, its successful execution heavily depends on market conditions and system deployment efficiency. Users must strictly control model parameters, data quality, and trading interface responsiveness to fully leverage its structural advantages and avoid significant risks.
 
-本风险说明书为所有作品集中结构文档的重要组成部分，可作为后续结构迭代、模拟检验与对外展示的重要依据。
+This risk disclosure statement forms an important component of all portfolio structure documentation and serves as a crucial reference for subsequent structural iterations, simulation testing, and external presentations.
 
-—— 衍生品结构设计师敬上
+— Derivative Structure Designer

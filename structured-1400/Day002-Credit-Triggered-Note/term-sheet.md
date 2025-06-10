@@ -1,90 +1,90 @@
-# Term Sheet（结构条款说明书）
+# Term Sheet
 
-## 产品名称  
-Credit-Triggered Redemption Note（信用触发赔付票据）
+## Product Name  
+Credit-Triggered Redemption Note
 
-## 产品类型  
-结构化信用保护型票据（路径依赖 + 自动敲出赔付 + 教学可替换模型）
+## Product Type  
+Structured Credit Protection Note (Path-Dependent + Automatic Knock-Out Payout + Educational Replaceable Model)
 
-## 标的资产  
-公开交易的公司债券 / REITs / 高风险企业应收票据（需单独明示）
+## Underlying Asset  
+Publicly traded corporate bonds / REITs / High-risk corporate receivables (to be specified separately)
 
-## 投资币种  
-人民币（CNY） / 美元（USD）
+## Investment Currency  
+Chinese Yuan (CNY) / US Dollar (USD)
 
-## 投资期限  
-12个月（结构可设定观察期 + 主结构存续期）
+## Investment Term  
+12 months (structure can set observation period + main structure duration)
 
-## 最小投资金额  
-￥100,000 起步（或等值美元）
+## Minimum Investment Amount  
+¥100,000 minimum (or equivalent in USD)
 
-## 收益结构  
-- 若未发生信用风险：  
-  - 到期获得固定票息 + 本金  
-  - 冻结观察期补偿金在结构结束时一并释放  
-- 若发生敲出（即信用评分跌破设定阈值）：  
-  - 立即终止结构  
-  - 赔付：贴现后的未来现金流总额 + 信用风险溢价（保费）
+## Yield Structure  
+- If no credit risk event occurs:  
+  - Fixed coupon + Principal at maturity  
+  - Frozen observation period compensation released at structure conclusion  
+- If knock-out occurs (i.e., credit score falls below threshold):  
+  - Immediate termination of structure  
+  - Payout: Discounted total of future cash flows + Credit risk premium (insurance premium)
 
-## 起始观察期（Observation Buffer）  
-- 时长：15天  
-- 功能：防止风控套利，结构冻结期间不计收益、不触发敲出  
-- 到期时补发观察期的贴现补偿金（基于当前模型：¥205.69）
+## Initial Observation Period  
+- Duration: 15 days  
+- Function: Prevents risk control arbitrage, no yield calculation or knock-out triggers during structure freeze period  
+- Discount compensation for observation period paid at maturity (based on current model: ¥205.69)
 
-## 敲出触发条件（Knock-Out Condition）  
-- 使用教学风险评分函数 `risk_score_func()` 计算公司信用分数  
-- 若评分低于50，连续3日，则判定敲出  
-- 此函数可替换，模型结构透明，适用于教学或实际部署场景
-- **增强功能**：支持机器学习模型和异常检测算法
+## Knock-Out Trigger Conditions  
+- Uses educational risk scoring function `risk_score_func()` to calculate company credit score  
+- If score is below 50 for 3 consecutive days, knock-out is triggered  
+- This function is replaceable, model structure is transparent, suitable for educational or actual deployment scenarios
+- **Enhanced functionality**: Support for machine learning models and anomaly detection algorithms
 
-## 敲出赔付结构  
-- 赔付金额 =  
-  - 所有剩余未来现金流贴现值（基于当前模型：¥104,816.22）
-  - + 信用风险溢价保费（默认：¥5,000）
-  - = 总赔付价值：¥109,816.22
-- 整体赔付封顶为票据发行价格的 110%
+## Knock-Out Payout Structure  
+- Payout amount =  
+  - Discounted value of all remaining future cash flows (based on current model: ¥104,816.22)
+  - + Credit risk premium (default: ¥5,000)
+  - = Total payout value: ¥109,816.22
+- Overall payout capped at 110% of note issuance price
 
-## 正常兑付结构  
-- 若结构未敲出，用户获得：  
-  - 所有应得现金流（¥104,816.22）
-  - + 起始观察期贴现补偿金（¥205.69）
-  - = 总期望价值：¥105,021.91
+## Normal Redemption Structure  
+- If structure is not knocked out, users receive:  
+  - All earned cash flows (¥104,816.22)
+  - + Initial observation period discount compensation (¥205.69)
+  - = Total expected value: ¥105,021.91
 
-## 模型机制  
-- 结构默认使用逻辑回归型评分函数估算违约概率  
-- 所有评分输入、阈值、行为路径均可替换  
-- 系统通过模拟路径估算不同敲出概率下的期望价值
-- **新增**：敏感性分析和专业级报告生成
+## Model Mechanism  
+- Structure default uses logistic regression scoring function to estimate default probability  
+- All scoring inputs, thresholds, and behavior paths are replaceable  
+- System estimates expected value under different knock-out probabilities through path simulation
+- **New addition**: Sensitivity analysis and professional report generation
 
-## 定价方式  
-- 结构票据发行价格 = 正常贴现价值 + 风险溢价保费  
-- 使用大数定理驱动风控结构合理性，允许教学中解反向定价方程  
-- **专业功能**：高质量可视化输出：敲出概率 vs 理论结构价值
-- **自动报告**：生成HTML格式详细分析报告
+## Pricing Method  
+- Structured note issuance price = Normal discounted value + Risk premium  
+- Uses law of large numbers to drive risk control structure rationality, allowing reverse pricing equation solving in educational settings  
+- **Professional feature**: High-quality visualization output: Knock-out probability vs. Theoretical structure value
+- **Automated reporting**: Generates detailed analysis reports in HTML format
 
-## 技术规格
-- **计算引擎**：Python数值计算框架
-- **可视化**：matplotlib专业图表生成
-- **报告系统**：HTML自动化报告生成
-- **日志记录**：完整的运行过程追踪
-- **模块化设计**：支持参数动态配置和功能扩展
+## Technical Specifications
+- **Calculation Engine**: Python numerical computation framework
+- **Visualization**: matplotlib professional chart generation
+- **Reporting System**: HTML automated report generation
+- **Logging**: Complete runtime process tracking
+- **Modular Design**: Supports dynamic parameter configuration and function extension
 
-## 风险提示（教学版）  
-- 本票据为结构化风险教学工具  
-- 非资本保证型结构，存在敲出赔付与定价偏差可能  
-- 请在实际部署中根据监管合规框架与风险偏好调整触发机制
-- **投资建议**：适合风险厌恶型投资者，建议作为投资组合的一部分
+## Risk Disclosure (Educational Version)  
+- This note is a structured risk educational tool  
+- Non-capital guaranteed structure, with potential for knock-out payouts and pricing deviations  
+- Please adjust trigger mechanisms according to regulatory compliance frameworks and risk appetite in actual deployment
+- **Investment recommendation**: Suitable for risk-averse investors, recommended as part of an investment portfolio
 
-## 适用场景  
-- 金融教学 / 衍生品研究 / 信用风险建模练习  
-- 高风险票据保护结构原型 / 投资人行为测试设计
-- **新增**：专业级金融工程项目和学术研究
+## Applicable Scenarios  
+- Financial education / Derivatives research / Credit risk modeling practice  
+- High-risk note protection structure prototype / Investor behavior testing design
+- **New addition**: Professional financial engineering projects and academic research
 
-## 技术支持与文档
-- 完整的代码文档和使用说明
-- 专业级可视化图表和分析报告
-- 模块化设计支持二次开发
-- 开源代码，支持学术研究和教学使用
+## Technical Support and Documentation
+- Complete code documentation and user instructions
+- Professional-grade visualization charts and analysis reports
+- Modular design supports secondary development
+- Open-source code, supports academic research and educational use
 
 ---
 

@@ -1,93 +1,93 @@
-# 衍生品结构 Day004 条款清单（Term Sheet）
+# Derivative Structure Day004 Term Sheet
 
-本文件为 Day004 波动率触发型多角套利货币互换型结构化衍生品的标准条款清单，面向潜在买方、销售团队与合规人员，作为理解产品结构与责任边界的正式摘要。
+This document serves as the standard term sheet for the Day004 Volatility-Triggered Multi-Leg Arbitrage Currency Swap Structured Derivative, intended for potential buyers, sales teams, and compliance personnel as a formal summary for understanding product structure and liability boundaries.
 
 ---
 
-## 一、基本条款
+## I. Basic Terms
 
-| 条款项目   | 描述                                  |
+| Term Item | Description |
 | ------ | ----------------------------------- |
-| 产品名称   | 波动率触发型多角货币套利互换结构（Day004）                  |
-| 产品类型   | 结构化衍生品 / 多货币套利产品                    |
-| 名义本金   | 自定义                                 |
-| 初始价格 p | 由定价模型输出确定，模拟价格见 `pricingresult.csv` |
-| 敲入条件   | 套利收益率超过敲入阈值 d = 0.002，触发套利通路执行         |
-| 敲出条件   | 套利路径期望收益低于敲出阈值 z = 0.0005，触发退出路径               |
-| 标的资产   | 外汇货币对（当前支持 USD, JPY, CNY, GBP, EUR）      |
-| 交易路径   | n 角多币种循环路径（默认 n = 4，可选）              |
-| 合约期限   | 敲入后最多持有 30 日或敲出发生（先到为准）             |
-| 利润获取方式 | 利用多币种套利偏离 + 货币互换延长套利时间              |
-| 互换机制   | 敲入后用户发起货币互换，将套利收益锁定在未来回币节点          |
+| Product Name | Volatility-Triggered Multi-Leg Currency Arbitrage Swap Structure (Day004) |
+| Product Type | Structured Derivative / Multi-Currency Arbitrage Product |
+| Notional Principal | Customizable |
+| Initial Price p | Determined by pricing model output, simulated prices in `pricingresult.csv` |
+| Knock-In Condition | Arbitrage yield exceeds knock-in threshold d = 0.002, triggering arbitrage path execution |
+| Knock-Out Condition | Expected arbitrage path yield falls below knock-out threshold z = 0.0005, triggering exit |
+| Underlying Assets | Foreign exchange currency pairs (currently supporting USD, JPY, CNY, GBP, EUR) |
+| Trading Path | n-leg multi-currency circular path (default n = 4, optional) |
+| Contract Term | Maximum 30 days after knock-in or until knock-out occurs (whichever comes first) |
+| Profit Mechanism | Utilizes multi-currency arbitrage deviation + currency swap to extend arbitrage time |
+| Swap Mechanism | After knock-in, user initiates currency swap, locking arbitrage profits at future currency return nodes |
 
 ---
 
-## 二、参数设定
+## II. Parameter Settings
 
-| 参数         | 含义          | 默认值    | 备注          |
+| Parameter | Meaning | Default Value | Notes |
 | ---------- | ----------- | ------ | ----------- |
-| d          | 敲入偏离阈值      | 0.002  | 当套利收益率超过此值时触发敲入  |
-| z          | 敲出收益下界      | 0.0005 | 当套利收益率低于此值时触发敲出     |
-| n          | 货币路径长度      | 4      | 可拓展至任意合法路径  |
-| τ\_max     | 最大套利持仓时间（天） | 30     | 避免长期持仓流动性风险 |
-| fee\_per\_trade | 每次交易手续费 | 0.001 | 影响总体套利收益 |
-| σ\_control | 模拟过程阻力因子    | 自适应    | 抑制极端方向变动概率  |
+| d | Knock-in deviation threshold | 0.002 | Knock-in triggered when arbitrage yield exceeds this value |
+| z | Knock-out yield lower bound | 0.0005 | Knock-out triggered when arbitrage yield falls below this value |
+| n | Currency path length | 4 | Expandable to any valid path |
+| τ_max | Maximum arbitrage position holding time (days) | 30 | Avoids long-term position liquidity risk |
+| fee_per_trade | Transaction fee per trade | 0.001 | Affects overall arbitrage yield |
+| σ_control | Simulation process resistance factor | Adaptive | Suppresses probability of extreme directional changes |
 
 ---
 
-## 三、定价方式（简述）
+## III. Pricing Method (Brief)
 
-* 使用几何布朗运动模拟货币兑换比率的波动过程：
+* Using Geometric Brownian Motion to simulate currency exchange ratio fluctuation process:
   $dS_t = \mu S_t dt + \sigma S_t dW_t$
 
-* 增加阻力项，调控模拟轨迹分布密度，模拟国家干预：
+* Adding resistance term to control simulation trajectory distribution density, simulating national intervention:
   $\text{drift} = \mu - k \cdot \tanh(deviation \cdot 10)$
 
-* 利用 Monte Carlo 方法模拟 10000 条套利路径，筛选路径收益与敲入/敲出阈值关系
+* Using Monte Carlo method to simulate 10,000 arbitrage paths, filtering path yields relative to knock-in/knock-out thresholds
 
 ---
 
-## 四、波动率模型
+## IV. Volatility Model
 
-* 基础波动率设置：各货币对波动率在 0.0060 至 0.0095 之间
-* GARCH 模型增强：可选择使用 GARCH(1,1) 模型生成动态波动率路径
-* 利率差异设置：主要货币年化利率从 0.0010 (JPY) 到 0.0350 (GBP)
-
----
-
-## 五、风险提示（摘要）
-
-* 本产品不保证套利机会一定存在
-* 汇率波动与执行滞后可能导致套利失败
-* 若用户无法及时发起货币互换，套利窗口可能关闭
-* 高波动市况下本产品可能长期处于空仓状态
-
-完整风险披露见 `risk-disclosure.md`
+* Basic volatility settings: Volatility for various currency pairs ranges between 0.0060 and 0.0095
+* GARCH model enhancement: Option to use GARCH(1,1) model to generate dynamic volatility paths
+* Interest rate differential settings: Major currency annual interest rates from 0.0010 (JPY) to 0.0350 (GBP)
 
 ---
 
-## 六、适用对象与用途
+## V. Risk Disclosure (Summary)
 
-* 高级投资机构用于展示外汇套利研究能力
-* 企业内部资金管理团队用于自定义结构设计
-* 不建议零售投资者直接参与
+* This product does not guarantee arbitrage opportunities will always exist
+* Exchange rate fluctuations and execution delays may lead to arbitrage failure
+* If users cannot initiate currency swaps in a timely manner, the arbitrage window may close
+* In highly volatile market conditions, this product may remain in cash position for extended periods
+
+For complete risk disclosure, see `risk-disclosure.md`
 
 ---
 
-## 七、文件关联
+## VI. Suitable Users and Applications
 
-| 文件名                 | 功能说明            |
+* Advanced investment institutions for demonstrating foreign exchange arbitrage research capabilities
+* Corporate internal fund management teams for custom structure design
+* Not recommended for direct participation by retail investors
+
+---
+
+## VII. Associated Documentation
+
+| Filename | Function Description |
 | ------------------- | --------------- |
-| `README.md`         | 概览文件，描述背景与逻辑结构  |
-| `whitepaper.md`     | 白皮书，完整介绍设计动机与理论 |
-| `trigger-engine.md` | 触发逻辑与参数设定       |
-| `risk-disclosure.md` | 风险说明书           |
-| `pricing_model.py`  | Python 主定价模型    |
-| `pricingresult.csv` | 模拟价格输出          |
-| `simulation_charts/` | 路径模拟图像输出文件夹     |
+| `README.md` | Overview file, describing background and logical structure |
+| `whitepaper.md` | Whitepaper, comprehensive introduction to design motivation and theory |
+| `trigger-engine.md` | Trigger logic and parameter settings |
+| `risk-disclosure.md` | Risk disclosure document |
+| `pricing_model.py` | Python main pricing model |
+| `pricingresult.csv` | Simulated price output |
+| `simulation_charts/` | Path simulation image output folder |
 
 ---
 
-## 八、版权与使用限制
+## VIII. Copyright and Usage Restrictions
 
-本结构为作者原创设计，仅用于展示衍生品结构构建与金融工程能力，不作为任何投资建议或销售材料。
+This structure is the author's original design, intended only to demonstrate derivative structure construction and financial engineering capabilities, not as investment advice or sales material.

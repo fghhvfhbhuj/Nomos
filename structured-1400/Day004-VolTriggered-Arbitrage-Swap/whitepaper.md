@@ -1,135 +1,135 @@
-# 衍生品结构 Day004 白皮书：波动率触发型多货币套利结构与货币互换延展设计
+# Derivative Structure Day004 Whitepaper: Volatility-Triggered Multi-Currency Arbitrage Structure and Currency Swap Extension Design
 
-本白皮书旨在完整阐述第004号结构化衍生产品的设计逻辑、市场动因、技术机制与风险假设。该结构隶属于 Structure1400 系列，用于展示金融衍生品结构设计能力与高级建模方法论，具备较高的理论原创性与实践可行性。
-
----
-
-## 一、设计动机与市场背景
-
-随着全球外汇市场的高频化与套利空间的稀薄化，经典三角套利的机会越来越短暂。为克服传统多角套利结构中的执行难题，我们提出了基于波动率触发的套利机制。
-
-通过监控多币种路径的套利收益率，当其波动超过特定阈值时，我们可以识别潜在的套利机会，并在检测到偏离时迅速入场执行。
-
-为了克服套利机会短暂的时间窗，我们引入**货币互换**机制，将原本需要即时完成的套利结构延展为具有中长期可持有能力的结构性套利。
+This whitepaper aims to fully articulate the design logic, market drivers, technical mechanisms, and risk assumptions of the 004th structured derivative product. This structure belongs to the Structure1400 series, demonstrating financial derivative structure design capabilities and advanced modeling methodologies, with high theoretical originality and practical feasibility.
 
 ---
 
-## 二、结构组成与运行流程
+## I. Design Motivation and Market Background
 
-### 1️⃣ 整体流程：
+As global foreign exchange markets become increasingly high-frequency and arbitrage opportunities become thinner, classic triangular arbitrage opportunities have become increasingly fleeting. To overcome execution challenges in traditional multi-leg arbitrage structures, we propose an arbitrage mechanism triggered by volatility.
 
-* 用户以价格 `p` 购买该衍生品
-* 系统实时监控套利收益率
-* 达到设定阈值 `d = 0.002` → 自动敲入
-* 系统执行 n 角货币闭环套利路径，配合货币互换完成时间延长操作
-* 当套利空间压缩至阈值 `z = 0.0005` 以下 → 自动敲出，产品关闭或寻找新路径
+By monitoring the arbitrage yield of multi-currency paths, when its volatility exceeds a specific threshold, we can identify potential arbitrage opportunities and quickly enter the market upon detecting deviations.
 
-### 2️⃣ 敲入逻辑：
-
-* 设定套利收益率阈值 `d = 0.002`
-* 检查是否存在某条 n 角货币路径满足：
-  $\text{路径收益率} > \text{总成本（包含滑点与手续费）}$
-* 若满足即认为存在套利机会，产品激活
-
-### 3️⃣ 套利执行机制：
-
-* 在设定路径中进行即时或T+0外汇交易操作
-* 使用货币互换协议将部分头寸置换为未来现金流，使其具备延展性与滚动套利能力
-
-### 4️⃣ 敲出逻辑：
-
-* 路径套利收益率下降至设定的压缩阈值 `z = 0.0005`
-* 或检测到流动性不足 / 利差回归 / 期限结构变化等其他触发事件
-* 自动清仓，产品终止
+To overcome the brief time window of arbitrage opportunities, we introduce a **currency swap** mechanism, extending what would normally require immediate completion into a structured arbitrage with medium to long-term holding capacity.
 
 ---
 
-## 三、定价模型与模拟方式
+## II. Structure Composition and Operational Process
 
-### 📈 数学建模核心：
+### 1️⃣ Overall Process:
 
-* 汇率 $S_{i \to j}(t)$ 采用几何布朗运动（GBM）建模
-* 引入**国家干预阻力函数** $f(S)$：当汇率极端变动时抑制其概率
-  * 具体实现为：$intervention = -0.01 \cdot \tanh(deviation \cdot 10)$
+* User purchases the derivative at price `p`
+* System monitors arbitrage yield in real-time
+* Reaches the set threshold `d = 0.002` → Automatic knock-in
+* System executes n-leg currency closed-loop arbitrage path, combined with currency swaps to extend the time horizon
+* When arbitrage spread compresses below threshold `z = 0.0005` → Automatic knock-out, product closes or seeks new paths
 
-### 🧮 模拟流程：
+### 2️⃣ Knock-In Logic:
 
-* 使用蒙特卡洛方法对汇率路径进行模拟（默认模拟 10,000 条路径）
-* 对每条路径进行套利路径检测，记录满足条件路径出现频率
-* 利用期望收益与折现计算产品价格区间，辅助设定发行价格 `p`
+* Set arbitrage yield threshold `d = 0.002`
+* Check if there exists an n-leg currency path that satisfies:
+  $\text{Path Yield} > \text{Total Cost (including slippage and fees)}$
+* If satisfied, arbitrage opportunity exists, product activates
 
-### 💹 波动率建模：
+### 3️⃣ Arbitrage Execution Mechanism:
 
-本模型提供两种波动率模拟方式：
+* Perform immediate or T+0 foreign exchange transactions along the set path
+* Use currency swap agreements to convert some positions into future cash flows, giving them extensibility and rolling arbitrage capability
 
-1. **静态波动率**：基于历史数据设定固定波动率参数
-   * 货币对波动率范围：0.0060 ~ 0.0095
-   * 例如：USD/JPY: 0.0080, USD/CNY: 0.0060
+### 4️⃣ Knock-Out Logic:
 
-2. **GARCH 动态波动率**：使用 GARCH(1,1) 模型生成时变波动率
-   * 通过 `simulate_garch_volatility` 函数实现
-   * 增强对极端市场环境的模拟能力
-
----
-
-## 四、用户使用与企业落地方式
-
-### 企业部署要求：
-
-* 拥有可访问多币种即期汇率与远期利率的数据库
-* 与流动性做市商或银行签署货币互换协议（ISDA框架）
-* 实现自动化 FX 报价、执行与对账系统
-
-### 实施方式：
-
-* 当触发套利机会后，系统即时进行 n 角兑换并开启互换协议
-* 所有执行均通过程序化系统完成，无人工介入延迟
+* Path arbitrage yield decreases to the set compression threshold `z = 0.0005`
+* Or detection of insufficient liquidity / interest rate convergence / term structure changes or other trigger events
+* Automatic liquidation, product terminates
 
 ---
 
-## 五、优化空间与未来演进
+## III. Pricing Model and Simulation Method
 
-### 🧠 参数智能化：
+### 📈 Mathematical Modeling Core:
 
-* 使用多因子指标：波动率、利差、流动性、成交量等
-* 引入参数权重 $w_i$，通过数据训练优化触发函数权重组合
-* 使用强化学习方法对套利路径选择进行在线学习
+* Exchange rate $S_{i \to j}(t)$ modeled using Geometric Brownian Motion (GBM)
+* Introduction of **national intervention resistance function** $f(S)$: suppresses probability when exchange rates change extremely
+  * Specific implementation: $intervention = -0.01 \cdot \tanh(deviation \cdot 10)$
 
-### ⏳ 参数生命周期机制：
+### 🧮 Simulation Process:
 
-* 每套训练参数设定时间窗，例如30日有效期
-* 定期滚动更新，形成训练 → 应用 → 再训练的生命周期闭环
+* Use Monte Carlo method to simulate exchange rate paths (default 10,000 paths)
+* Detect arbitrage paths for each path, record frequency of qualified paths
+* Calculate product price range using expected returns and discounting, assisting in setting issuance price `p`
 
-### 🔍 波动率模型增强：
+### 💹 Volatility Modeling:
 
-* 扩展当前的 GARCH(1,1) 模型至更复杂的模型形式
-* 引入跳跃扩散过程，更好地捕捉汇率市场的剧烈波动
-* 结合市场情绪指标，提升模型对异常波动的预测能力
+This model provides two volatility simulation methods:
 
----
+1. **Static Volatility**: Set fixed volatility parameters based on historical data
+   * Currency pair volatility range: 0.0060 ~ 0.0095
+   * For example: USD/JPY: 0.0080, USD/CNY: 0.0060
 
-## 六、货币清单与参数设置
-
-### 当前支持的货币：
-
-* USD（美元）- 基准货币
-* JPY（日元）- 年利率 0.0010
-* CNY（人民币）- 年利率 0.0250
-* GBP（英镑）- 年利率 0.0350
-* EUR（欧元）- 年利率 0.0200
-
-### 关键参数：
-
-* 敲入阈值 d = 0.002
-* 敲出阈值 z = 0.0005
-* 每次交易手续费 fee_per_trade = 0.001
-* 模拟路径数 num_simulations = 10,000
-* 模拟天数 simulation_days = 30
+2. **GARCH Dynamic Volatility**: Generate time-varying volatility using GARCH(1,1) model
+   * Implemented through the `simulate_garch_volatility` function
+   * Enhanced ability to simulate extreme market environments
 
 ---
 
-## 七、结语
+## IV. User Implementation and Enterprise Deployment Methods
 
-Day004 产品结构展示了从金融原理出发，到套利路径构造，再到延展执行机制的一整套设计逻辑。该结构可作为金融结构设计师在资产管理、做市套利、对冲基金等机构中的理论与工程能力证明。
+### Enterprise Deployment Requirements:
 
-此为 Structure1400 项目集之第四结构
+* Access to databases for multi-currency spot exchange rates and forward interest rates
+* Currency swap agreements (ISDA framework) with liquidity market makers or banks
+* Implementation of automated FX quotation, execution, and reconciliation systems
+
+### Implementation Method:
+
+* When arbitrage opportunities are triggered, the system immediately conducts n-leg exchanges and initiates swap agreements
+* All executions are completed through programmatic systems, with no manual intervention delays
+
+---
+
+## V. Optimization Space and Future Evolution
+
+### 🧠 Parameter Intelligence:
+
+* Use multi-factor indicators: volatility, interest rate differentials, liquidity, trading volume, etc.
+* Introduce parameter weights $w_i$, optimize trigger function weight combinations through data training
+* Use reinforcement learning methods for online learning of arbitrage path selection
+
+### ⏳ Parameter Lifecycle Mechanism:
+
+* Set time windows for each set of training parameters, e.g., 30-day validity period
+* Regular rolling updates, forming a training → application → retraining lifecycle loop
+
+### 🔍 Volatility Model Enhancement:
+
+* Extend the current GARCH(1,1) model to more complex model forms
+* Introduce jump diffusion processes to better capture dramatic fluctuations in the forex market
+* Integrate market sentiment indicators to enhance model prediction of abnormal volatility
+
+---
+
+## VI. Currency List and Parameter Settings
+
+### Currently Supported Currencies:
+
+* USD (US Dollar) - Base currency
+* JPY (Japanese Yen) - Annual interest rate 0.0010
+* CNY (Chinese Yuan) - Annual interest rate 0.0250
+* GBP (British Pound) - Annual interest rate 0.0350
+* EUR (Euro) - Annual interest rate 0.0200
+
+### Key Parameters:
+
+* Knock-in threshold d = 0.002
+* Knock-out threshold z = 0.0005
+* Fee per trade fee_per_trade = 0.001
+* Number of simulation paths num_simulations = 10,000
+* Simulation days simulation_days = 30
+
+---
+
+## VII. Conclusion
+
+The Day004 product structure demonstrates a complete design logic from financial principles to arbitrage path construction to extension execution mechanisms. This structure can serve as theoretical and engineering proof of capability for financial structure designers in asset management, market-making arbitrage, hedge funds, and other institutions.
+
+This is the fourth structure in the Structure1400 project collection.

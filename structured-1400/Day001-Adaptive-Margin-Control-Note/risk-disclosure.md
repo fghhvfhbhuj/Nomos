@@ -1,80 +1,79 @@
-# Risk Disclosure — Adaptive Margin-Control Note  
-**（风险揭示说明 — 自适应保证金控制票据）**
+# Risk Disclosure — Adaptive Margin-Control Note
 
 ---
 
-## 一、产品风险等级评估
+## 1. Product Risk Level Assessment
 
-- 本产品为结构化衍生品，涉及杠杆机制，属于高风险金融工具。
-- 仅适用于具备专业投资经验与风险承受能力的合格投资者。
-- 投资者应在充分理解产品机制与风险后，自主决定是否参与。
-
----
-
-## 二、主要风险类型
-
-### 1. 市场风险
-- 标的资产价格波动可能导致账户权益剧烈波动。
-- 若价格剧烈下跌导致权益低于维持保证金线，且资金池无法补足，将触发强制终止，可能造成本金严重损失。
-
-### 2. 杠杆风险
-- 本产品默认通过结构头寸引入高杠杆（如10倍），将放大市场波动对本金的影响。
-- 小幅市场变动即可造成大幅盈亏，尤其在波动率突变时风险极大。
-
-### 3. 资金池依赖风险
-- 本产品的风险缓冲能力依赖于敲入机制触发后产生的“保护资金池”。
-- 若结构未触发敲入，或池内资金过小，将失去补仓能力，从而加剧强平风险。
-
-### 4. 操作失误与延迟风险
-- 若客户未设置自动补仓机制，需手动操作注入资金池。
-- 实际执行过程中可能因延迟、错误、系统问题导致补仓失败，引发强平。
-
-### 5. 尾部风险与极端市场事件
-- 本产品采用了增强型风险模型，包含跳跃扩散过程和随机波动率模拟，能够更准确地评估极端市场事件的影响。
-- 跳跃风险：市场突发事件可能导致标的价格出现跳跃性变动，引发保证金不足和强制平仓。根据模型设置，每年预期跳跃次数为5次，平均跳跃大小为-1%，标准差为3%。
-- 波动率聚集效应：在市场动荡时期，高波动率倾向于持续存在并可能进一步加剧，随机波动率模型（均值回归速度3.0，长期均值20%，波动率的波动率30%）捕捉了这种现象。
-- 条件风险价值(CVaR)：模型计算表明，在最差的5%情况下，平均损失可能达到-38.78%，请参考定价结果中的CVaR指标。
-- 最大回撤风险：在投资期内，产品可能经历显著的临时性亏损（平均最大回撤为27.64%），即使最终收益为正。
-
-### 6. 风险管理建议
-基于增强模型的分析，我们建议投资者：
-1. 设置风险预警：根据账户权益变化设定多级预警阈值，不仅限于维持保证金线。
-2. 准备额外资金：除初始投资外，准备相当于本金10-20%的额外资金，应对可能的补仓需求。
-3. 关注波动率变化：定期观察市场波动率水平，在波动率大幅上升时提高警惕。
-4. 制定资金池使用策略：预先决定在不同市场情境下如何使用资金池，避免在市场压力下做出情绪化决策。
-5. 设置止损水平：尽管产品有内置风险控制，投资者仍应考虑设置个人可接受的最大损失水平。
-
-### 7. 风险指标解读
-本产品定价模型提供以下关键风险指标，投资者应理解其含义：
-
-| 风险指标 | 解释 | 应用 | 当前值 |
-|---------|------|------|-------|
-| 95% VaR | 在95%置信水平下的最大潜在损失 | 评估一般市场条件下的风险敞口 | -32.38% |
-| 99% VaR | 在99%置信水平下的最大潜在损失 | 评估更极端市场条件下的风险敞口 | -42.74% |
-| CVaR/期望亏损 | VaR之外的平均损失 | 了解尾部风险的严重程度 | -38.78% |
-| 平均最大回撤 | 投资期内可能的最大临时亏损 | 评估持有期间的心理压力 | 27.64% |
-| 敲入概率 | 触发收益封顶机制的可能性 | 了解获得最大收益的概率 | 33.43% |
-| 强平概率 | 触发强制平仓的可能性 | 评估投资提前终止的风险 | 0% |
-
-### 8. 波动率敏感性
-产品表现对市场波动率高度敏感。根据敏感性分析：
-- 当波动率上升时，敲入概率增加，同时强平风险也增加
-- 中等波动率环境（15%-25%）通常是产品表现最优的区间
-- 极高波动率环境（>35%）可能导致资金池机制效果降低
-- 波动率突变可能导致保证金不足，即使价格变动看似温和
-
-投资者应定期查看最新的波动率敏感性分析结果，了解当前市场环境对产品的潜在影响。
+- This product is a structured derivative involving leverage mechanisms, classified as a high-risk financial instrument.
+- Suitable only for qualified investors with professional investment experience and risk tolerance.
+- Investors should independently decide whether to participate after fully understanding the product mechanism and risks.
 
 ---
 
-## 三、免责声明与适用范围
+## 2. Key Risk Types
 
-- 本产品为结构性金融工具示例，当前版本为模拟设计，仅用于教育、建模与结构开发展示。
-- 不构成任何销售建议、承诺收益或投资推荐。
-- 若实际用于市场发行，应由持牌金融机构进行合规审查、风险测算、法律文件准备与监管备案。
+### 1. Market Risk
+- Price fluctuations of the underlying asset may cause significant equity volatility.
+- If prices drop sharply, causing equity to fall below the maintenance margin line, and the fund pool cannot replenish, forced termination may occur, potentially leading to severe principal losses.
+
+### 2. Leverage Risk
+- The product introduces high leverage (e.g., 10x) through structured positions, amplifying the impact of market fluctuations on principal.
+- Minor market changes can result in significant gains or losses, especially during sudden volatility shifts.
+
+### 3. Fund Pool Dependency Risk
+- The product's risk-buffering capability relies on the "protection fund pool" generated after knock-in events.
+- If knock-in is not triggered or the pool is insufficient, the ability to replenish margins is lost, increasing forced liquidation risk.
+
+### 4. Operational Errors and Delay Risk
+- If clients do not set up automatic margin replenishment mechanisms, manual operations are required to inject funds into the pool.
+- Execution delays, errors, or system issues may lead to replenishment failure, triggering forced liquidation.
+
+### 5. Tail Risk and Extreme Market Events
+- The product employs an enhanced risk model, including jump diffusion processes and stochastic volatility simulations, to better assess the impact of extreme market events.
+- Jump Risk: Sudden market events may cause abrupt price changes, leading to margin insufficiency and forced liquidation. The model anticipates five jumps per year, with an average jump size of -1% and a standard deviation of 3%.
+- Volatility Clustering: During turbulent periods, high volatility tends to persist and may intensify further. The stochastic volatility model (mean reversion speed 3.0, long-term mean 20%, volatility of volatility 30%) captures this phenomenon.
+- Conditional Value at Risk (CVaR): Model calculations indicate that in the worst 5% of cases, average losses may reach -38.78%. Refer to pricing results for CVaR metrics.
+- Maximum Drawdown Risk: During the investment period, the product may experience significant temporary losses (average maximum drawdown of 27.64%), even if final returns are positive.
+
+### 6. Risk Management Recommendations
+Based on enhanced model analysis, we recommend investors:
+1. Set risk alerts: Establish multi-level alert thresholds based on equity changes, not limited to the maintenance margin line.
+2. Prepare additional funds: In addition to initial investments, prepare extra funds equivalent to 10-20% of the principal to address potential replenishment needs.
+3. Monitor volatility changes: Regularly observe market volatility levels and remain vigilant during significant volatility increases.
+4. Develop fund pool usage strategies: Pre-determine how to utilize the fund pool under different market scenarios to avoid emotional decisions under market pressure.
+5. Set stop-loss levels: Despite built-in risk controls, investors should consider setting personal maximum loss levels.
+
+### 7. Risk Indicator Interpretation
+The product pricing model provides the following key risk indicators, which investors should understand:
+
+| Risk Indicator | Explanation | Application | Current Value |
+|----------------|-------------|-------------|---------------|
+| 95% VaR       | Maximum potential loss at 95% confidence level | Assess risk exposure under general market conditions | -32.38% |
+| 99% VaR       | Maximum potential loss at 99% confidence level | Assess risk exposure under extreme market conditions | -42.74% |
+| CVaR/Expected Loss | Average loss beyond VaR | Understand the severity of tail risks | -38.78% |
+| Average Maximum Drawdown | Potential maximum temporary loss during the investment period | Assess psychological pressure during holding | 27.64% |
+| Knock-In Probability | Likelihood of triggering yield cap mechanism | Understand the probability of achieving maximum returns | 33.43% |
+| Forced Liquidation Probability | Likelihood of triggering forced liquidation | Assess risk of premature termination | 0% |
+
+### 8. Volatility Sensitivity
+Product performance is highly sensitive to market volatility. Sensitivity analysis indicates:
+- As volatility increases, knock-in probability rises, but forced liquidation risk also increases.
+- Moderate volatility environments (15%-25%) are typically optimal for product performance.
+- Extremely high volatility environments (>35%) may reduce the effectiveness of the fund pool mechanism.
+- Sudden volatility changes may lead to margin insufficiency, even if price movements appear mild.
+
+Investors should regularly review the latest volatility sensitivity analysis results to understand the potential impact of current market conditions on the product.
 
 ---
 
-**风险自担，谨慎投资。**
+## 3. Disclaimer and Scope of Application
+
+- This product is a structured financial instrument example, currently designed for simulation purposes only, intended for education, modeling, and structural development demonstrations.
+- It does not constitute any sales advice, guaranteed returns, or investment recommendations.
+- If used for market issuance, compliance reviews, risk assessments, legal document preparation, and regulatory filings should be conducted by licensed financial institutions.
+
+---
+
+**Invest at your own risk. Exercise caution.**
 
 
